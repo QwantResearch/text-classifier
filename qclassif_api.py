@@ -28,15 +28,18 @@ class CLASSIFEngine(object):
         # sys.stderr.write("SET MODEL: "+str(language)+"\n Model: "+model_filename+"\n")
 
         
-    def classification_function(self, text,domain):
+    def classification_function(self, text,domain,nbest=1):
         sys.stderr.write("ASK CLASSIFICATION: "+str(domain)+" ||| "+text+"\n")
         l_classification_results=[]
         if domain in self._classifmodel:
-            l_labels,l_probs = self._classifmodel[str(domain)].predict([text.strip()])
-            for i in range(len(l_labels)):
-                l_classification_results.append([l_labels[i][0].replace("__label__",""),l_probs[i][0]])
-            print (l_labels)
-            print (l_classification_results)
+            #print (nbest)
+            l_labels,l_probs = self._classifmodel[str(domain)].predict([text.strip()],nbest)
+            for i in range(len(l_labels[0])):
+                l_classification_results.append([l_labels[0][i].replace("__label__",""),l_probs[0][i]])
+            #print (l_labels[0])
+            #print (l_probs[0])
+            #print (len(l_labels[0]))
+            #print (l_classification_results)
             #sys.stderr.write("CLASSIFICATION: "+str(domain)+" ||| "+text+" ||| "+str(l_classification_results)+"\n")
             return l_classification_results
         else:
@@ -182,21 +185,23 @@ class ClassificationResource(object):
             raise falcon.HTTPBadRequest(
                 'Missing data',
                 'A text and a domain must be submitted in the request body.')
+        if "count" not in doc:
+            doc["count"]=1
         if len(doc["text"]) > 0:
             if doc["domain"] == "language_identification":
-                doc["result"]=self.classifmodel.classification_function(doc["text"],"language_identification")
+                doc["result"]=self.classifmodel.classification_function(doc["text"],"language_identification",doc["count"])
                 #doc["result"][0]=doc["result"][0].replace("__label__","")
                 doc["language"]=doc["result"][0][0].replace("__label__","") 
                 #doc["language"]=doc["result"][0]
             else:
                 if doc["language"] == "guess":
-                    doc["result"]=self.classifmodel.classification_function(doc["text"],"language_identification")
+                    doc["result"]=self.classifmodel.classification_function(doc["text"],"language_identification",doc["count"])
                     doc["language"]=doc["result"][0][0].replace("__label__","") 
                 else:
-                    doc["result"]=self.classifmodel.classification_function(doc["text"],"language_identification")
+                    doc["result"]=self.classifmodel.classification_function(doc["text"],"language_identification",doc["count"])
                     doc["language"]=doc["result"][0][0].replace("__label__","") 
                     doc["tokenized"]=self.classifmodel.tokenize(doc["text"],doc["language"])
-                    doc["result"]=self.classifmodel.classification_function(doc["text"],doc["domain"])
+                    doc["result"]=self.classifmodel.classification_function(doc["text"],doc["domain"],doc["count"])
         else:
             doc["tokenized"]=""
             doc["result"]=""
