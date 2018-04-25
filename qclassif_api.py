@@ -28,38 +28,44 @@ class CLASSIFEngine(object):
         # sys.stderr.write("SET MODEL: "+str(language)+"\n Model: "+model_filename+"\n")
 
         
-    def classification_function(self, text,language):
-        sys.stderr.write("ASK CLASSIFICATION: "+str(language)+" ||| "+text+"\n")
+    def classification_function(self, text,domain):
+        sys.stderr.write("ASK CLASSIFICATION: "+str(domain)+" ||| "+text+"\n")
         l_classification_results=[]
-        if language in self._classifmodel:
-            l_labels,l_probs = self._classifmodel[str(language)].predict([text.strip()])
+        if domain in self._classifmodel:
+            l_labels,l_probs = self._classifmodel[str(domain)].predict([text.strip()])
             for i in range(len(l_labels)):
-                l_classification_results.append([l_labels[i][0],l_probs[i][0]])
+                l_classification_results.append([l_labels[i][0].replace("__label__",""),l_probs[i][0]])
             print (l_labels)
             print (l_classification_results)
-            #sys.stderr.write("CLASSIFICATION: "+str(language)+" ||| "+text+" ||| "+str(l_classification_results)+"\n")
+            #sys.stderr.write("CLASSIFICATION: "+str(domain)+" ||| "+text+" ||| "+str(l_classification_results)+"\n")
             return l_classification_results
         else:
-            sys.stderr.write("CLASSIFICATION ERROR: "+str(language)+" ||| "+text+"\n")
+            sys.stderr.write("CLASSIFICATION ERROR: "+str(domain)+" ||| "+text+"\n")
             return []
 
-    def set_classification_model(self,model_filename,language):
-        sys.stderr.write("SET MODEL: "+str(language)+"\n Model: "+model_filename+"\n")
-        self._classifmodel[str(language)] = ft.load_model(model_filename)
-        self._tokenizer[str(language)] = qtokenizer.qtokenizer(language)
+    def set_classification_model(self,model_filename,domain):
+        sys.stderr.write("SET MODEL: "+str(domain)+"\n Model: "+model_filename+"\n")
+        self._classifmodel[str(domain)] = ft.load_model(model_filename)
+        
+    def set_tokenizer(self,language):
+        self._tokenizer[language] = qtokenizer.qtokenizer(language)
 
 
     def tokenize(self, text,language):
         sys.stderr.write("TOKENIZE: "+str(language)+" ||| "+text+"\n")
         if language in self._tokenizer:
             l_tokenized=self._tokenizer[language].tokenize_str(text.strip())
-            sys.stderr.write(l_tokenized+"\n")
+            #sys.stderr.write(l_tokenized+"\n")
             return l_tokenized
         else:
-            sys.stderr.write("TOKENIZE ERROR: "+str(language)+" ||| "+text+"\n")
-            return "None"
+            set_tokenizer(self,language)
+            l_tokenized=self._tokenizer[language].tokenize_str(text.strip())
+            #sys.stderr.write(l_tokenized+"\n")
+            return l_tokenized
+            #sys.stderr.write("TOKENIZE ERROR: "+str(language)+" ||| "+text+"\n")
+            #return "None"
 
-    def get_languages(self):
+    def get_domains(self):
         l_lp=[]
         for l_keys in self._classifmodel.keys():
             l_lp.append(l_keys)
@@ -174,15 +180,26 @@ class ClassificationResource(object):
             doc = req.context['doc']
         except KeyError:
             raise falcon.HTTPBadRequest(
-                'Missing thing',
-                'A thing must be submitted in the request body.')
+                'Missing data',
+                'A text and a domain must be submitted in the request body.')
         if len(doc["text"]) > 0:
-            doc["tokenized"]=self.classifmodel.tokenize(doc["text"],doc["language"])
-            doc["result"]=[]
-            doc["result"].append({"generic_model_"+doc["language"]:[self.classifmodel.classification_function(doc["tokenized"],doc["language"])]})
+            if doc["domain"] == "language_identification":
+                doc["result"]=self.classifmodel.classification_function(doc["text"],"language_identification")
+                #doc["result"][0]=doc["result"][0].replace("__label__","")
+                doc["language"]=doc["result"][0][0].replace("__label__","") 
+                #doc["language"]=doc["result"][0]
+            else:
+                if doc["language"] == "guess":
+                    doc["result"]=self.classifmodel.classification_function(doc["text"],"language_identification")
+                    doc["language"]=doc["result"][0][0].replace("__label__","") 
+                else:
+                    doc["result"]=self.classifmodel.classification_function(doc["text"],"language_identification")
+                    doc["language"]=doc["result"][0][0].replace("__label__","") 
+                    doc["tokenized"]=self.classifmodel.tokenize(doc["text"],doc["language"])
+                    doc["result"]=self.classifmodel.classification_function(doc["text"],doc["domain"])
         else:
             doc["tokenized"]=""
-            doc["result"]=[]
+            doc["result"]=""
         resp.context['result'] = doc
         resp.set_header('Powered-By', 'Qwant Research')
         resp.status = falcon.HTTP_202
@@ -194,28 +211,15 @@ class LanguageResource(object):
         self.logger = logging.getLogger('qclassif_api.' + __name__)
         self.classifmodel = classifmodel 
     
-    def get_language_data(self):
-        return {
-        "de": ['Allemand', 'de'],
-        "en": ['Anglais', 'gb'],
-        "es": ['Espagnol', 'es'],
-        "fr": ['Français', 'fr'],
-        "nl": ['Néerlandais', 'nl'],
-        "pt": ['Portugais', 'pt'],
-        "cs": ['Tchèque', 'cz'],
-        "it": ['Italien', 'it']
-        }
-
-
     @falcon.before(max_body(64 * 1024))
     def on_get(self, req, resp):
         resp.set_header('Powered-By', 'Qwant Research')
         resp.status = falcon.HTTP_200
         doc={}
-        doc["language_available"]=[]
-        doc["language_available"]=self.classifmodel.get_languages()
-        doc["languages"]={}
-        doc["languages"]=self.get_language_data()
+        doc["classification_model_available"]=[]
+        doc["classification_model_available"]=self.classifmodel.get_domains()
+        #doc["languages"]={}
+        #doc["languages"]=self.get_language_data()
         resp.context['result'] = doc
         resp.set_header('Powered-By', 'Qwant Research')
         # resp.set_header('Access-Control-Allow-Methods', 'GET')
@@ -233,12 +237,14 @@ for lines in fconfig:
     l_data=lines.split()
     classificationEngine.set_classification_model(l_data[1],l_data[0])
 
+classificationEngine.set_tokenizer("fr")
+classificationEngine.set_tokenizer("en")
     
 classification = ClassificationResource(classificationEngine)
 languages= LanguageResource(classificationEngine)
 
 app.add_route('/classification',classification)
-app.add_route('/languages',languages)
+app.add_route('/domains',languages)
 
 if __name__ == '__main__':
     httpd = simple_server.make_server(inet, iport, app)

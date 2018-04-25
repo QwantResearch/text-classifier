@@ -3,7 +3,9 @@
 // #include <boost/program_options.hpp>
 // #include <chrono>
 // #include <algorithm>
-#include "tokenizer.h"
+#include "qnlp/tokenizer.h"
+#include "qnlp/en_tokenizer.h"
+#include "qnlp/fr_tokenizer.h"
 // #include "bpe.h"
 // #include "BatchReader.h"
 // #include "BatchWriter.h"
@@ -14,42 +16,78 @@
 
 using namespace pybind11;
 using namespace std;
-using namespace webee;
+using namespace qnlp;
 
 class qtokenizer
 {
     public:
-        webee::Tokenizer * _tokenizer;
+        qnlp::Tokenizer * _tokenizer;
+        qnlp::Tokenizer_fr * _fr_tokenizer;
+        qnlp::Tokenizer_en * _en_tokenizer;
         string _lang;
-        qtokenizer(string &src_lang)
+        qtokenizer(string &lang)
         {
-            _lang = src_lang;
-            _tokenizer = new webee::Tokenizer(false,false,false,false,src_lang);
+            _lang = lang;
+            if (lang == "fr")
+            {
+                _fr_tokenizer = new qnlp::Tokenizer_fr(qnlp::Tokenizer::PLAIN,false,false,false,false);
+            }
+            else if (lang == "en")
+            {
+                _en_tokenizer = new qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN,false,false,false,false);
+            }
+            else
+            {
+                _tokenizer = new qnlp::Tokenizer(qnlp::Tokenizer::PLAIN,false,false,false,false);
+            }
+        }
+        void set_tokenizer(string &lang)
+        {
+            _lang = lang;
+            if (_lang == "fr")
+            {
+                _fr_tokenizer = new qnlp::Tokenizer_fr(qnlp::Tokenizer::PLAIN,false,false,false,false);
+            }
+            else if (_lang == "en")
+            {
+                _en_tokenizer = new qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN,false,false,false,false);
+            }
+            else
+            {
+                _tokenizer = new qnlp::Tokenizer(qnlp::Tokenizer::PLAIN,false,false,false,false);
+            }
         }
         vector<string> tokenize(string &input)
         {
-            vector<string> to_return=_tokenizer->tokenize_sentence(input);
+            vector<string> to_return;
+            if (_lang == "fr")
+            {
+                to_return=_fr_tokenizer->tokenize_sentence(input);
+            }
+            else if (_lang == "en")
+            {
+                to_return=_en_tokenizer->tokenize_sentence(input);
+            }
+            else
+            {
+                to_return=_tokenizer->tokenize_sentence(input);
+            }
             return to_return;
         }
         string tokenize_str(string &input)
         {
-            // cerr << "INSIDE:" << input << endl;
-            vector<string> to_return=_tokenizer->tokenize_sentence(input);
-            // cerr << "INSIDE2:" << input << endl;
-            stringstream l_out;
-            l_out.str("");
-            for (int i=0; i < (int)to_return.size(); i++)
+            if (_lang == "fr")
             {
-                if (i == (int)to_return.size()-1)
-                {
-                    l_out << to_return[i];
-                }
-                else
-                {
-                    l_out << to_return[i] << " ";
-                }
+                return _fr_tokenizer->tokenize_sentence_to_string(input);
             }
-            return l_out.str();
+            else if (_lang == "en")
+            {
+                return _en_tokenizer->tokenize_sentence_to_string(input);
+            }
+            else
+            {
+                return _tokenizer->tokenize_sentence_to_string(input);
+            }
         }
 };
 

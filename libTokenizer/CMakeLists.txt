@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(qtranslate)
+project(qtokenizer)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_BUILD_TYPE Release)
@@ -20,15 +20,13 @@ FIND_LIBRARY(FASTTEXT_LIB fasttext /usr/local/lib)
 # TARGET_LINK_LIBRARIES(testOVAS ${QNLP_LIB})
 
 
-SET(QTRANS_SRC
-	src/qtranslate.cpp 
-	src/BatchReader.cpp 
-	src/BatchWriter.cpp
+SET(QTOK_SRC
+	src/qtokenizer.cpp 
 )
 
-#pybind11_add_module(${PROJECT_NAME} ${QTRANS_SRC}) 
-add_library(${PROJECT_NAME} SHARED ${QTRANS_SRC})
-target_link_libraries(${PROJECT_NAME} ${QNLP_LIB} ${FASTTEXT_LIB} pybind11::module qnlp onmt fasttext)
+#pybind11_add_module(${PROJECT_NAME} ${QTOK_SRC}) 
+add_library(${PROJECT_NAME} SHARED ${QTOK_SRC})
+target_link_libraries(${PROJECT_NAME} ${QNLP_LIB} ${FASTTEXT_LIB} pybind11::module qnlp )
 
 
 install(TARGETS ${PROJECT_NAME}
