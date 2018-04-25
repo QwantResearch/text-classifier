@@ -30,3 +30,13 @@ Then:
   python3 qclassif_api.py
 ``` 
 
+## Query example
+```
+curl -X POST \
+  http://10.100.2.5:8888/classification \
+  -H 'Authorization: customized-token' \
+  -H 'Cache-Control: no-cache' \
+  -H 'Content-Type: application/json' \
+  -H 'Postman-Token: 0ba004a2-3b50-5019-d788-32aec5e7cbe3' \
+  -d '{"text":"paris reservation chambre","domain":"intention","count":10}'
+  ```
