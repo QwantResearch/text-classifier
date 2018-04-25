@@ -1,0 +1,2 @@
+language_identification	resources/lid.176.ftz
+intention	resources/model_query_IA_v9.bin
