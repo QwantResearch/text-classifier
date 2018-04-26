@@ -40,3 +40,25 @@ curl -X POST \
   -H 'Postman-Token: 0ba004a2-3b50-5019-d788-32aec5e7cbe3' \
   -d '{"text":"paris reservation chambre","domain":"intention","count":10}'
   ```
+which returns:
+```
+{
+     "domain": "intention", 
+     "tokenized": "paris reservation chambre", 
+     "result": [
+          ["hotel", 0.9443409442901611], 
+          ["flight", 0.05350146442651749], 
+          ["pagesjaunes", 0.001554204965941608], 
+          ["others", 0.0005534848314709961], 
+          ["maps", 3.014166395587381e-05], 
+          ["shopping", 2.9071170501993038e-05], 
+          ["music", 2.0554260117933154e-05], 
+          ["horaire", 1.9974664610344917e-05], 
+          ["fligth", 1.9753684682655148e-05], 
+          ["movie", 1.7308637325186282e-05]
+     ], 
+     "language": "en", 
+     "text": "paris reservation chambre", 
+     "count": 10
+}
+```
