@@ -33,7 +33,7 @@ Then:
 ## Query example
 ```
 curl -X POST \
-  http://10.100.2.5:8888/classification \
+  http://xx.xx.xx.xx:yyyy/classification \
   -H 'Authorization: customized-token' \
   -H 'Cache-Control: no-cache' \
   -H 'Content-Type: application/json' \
