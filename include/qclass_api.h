@@ -27,6 +27,9 @@
  *
  */
 
+#ifndef __QCLASS_API_H
+#define __QCLASS_API_H
+
 #include <algorithm>
 
 #include "qtokenizer.h"
@@ -57,8 +60,10 @@ const std::string currentDateTime();
 
 class Classifier {
 public:
-  Classifier(std::string &filename, std::string &domain);
-  std::vector<std::pair<fasttext::real, string>> prediction(std::tring &text, int count);
+  Classifier(std::string &filename, std::string &domain) :
+    _domain(domain) { _model.loadModel(filename.c_str()); }
+
+  std::vector<std::pair<fasttext::real, std::string>> prediction(std::string &text, int count);
   std::string getDomain() { return _domain; }
 
 private:
@@ -68,7 +73,7 @@ private:
 
 class StatsEndpoint {
 public:
-  StatsEndpoint(Address addr, string classif_config, int debug_mode);
+  StatsEndpoint(Address addr, string classif_config, int debug_mode = 0);
  
   void init(size_t thr);
   void start();
@@ -108,3 +113,5 @@ private:
   std::shared_ptr<Http::Endpoint> httpEndpoint;
   Rest::Router router;
 };
+
+#endif // __QCLASS_API_H

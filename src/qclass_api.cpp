@@ -1,8 +1,7 @@
-/***************************************************************************
+/*
  * MIT License
  *
- * Copyright (c) 2018 Christophe SERVAN, Qwant Research,
- * email: christophe[dot]servan[at]qwantresearch[dot]com
+ * Copyright (c) 2019 Qwant Research
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,30 +20,22 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- ***************************************************************************/
-#include <algorithm>
+ *
+ * Authors:
+ * Christophe Servan <c.servan@qwantresearch.com>
+ * Noel Martin <n.martin@qwantresearch.com>
+ *
+ */
+
+#include "qclass_api.h"
 
 #include "qtokenizer.h"
-#include <fasttext/fasttext.h>
-#include <iostream>
-#include <map>
-#include <nlohmann/json.hpp>
-#include <pistache/client.h>
-#include <pistache/endpoint.h>
-#include <pistache/http.h>
-#include <pistache/router.h>
-#include <sstream>
-#include <time.h>
-
-using namespace std;
-using namespace nlohmann;
-using namespace fasttext;
-using namespace Pistache;
 
 void printCookies(const Http::Request &req) {
   auto cookies = req.cookies();
-  std::cout << "Cookies: [" << std::endl;
   const std::string indent(4, ' ');
+
+  std::cout << "Cookies: [" << std::endl;
   for (const auto &c : cookies) {
     std::cout << indent << c.name << " = " << c.value << std::endl;
   }
@@ -56,6 +47,7 @@ void Split(const std::string &line, std::vector<std::string> &pieces,
   size_t begin = 0;
   size_t pos = 0;
   std::string token;
+
   while ((pos = line.find(del, begin)) != std::string::npos) {
     if (pos > begin) {
       token = line.substr(begin, pos - begin);
@@ -78,6 +70,7 @@ void handleReady(const Rest::Request &, Http::ResponseWriter response) {
 }
 
 } // namespace Generic
+
 const std::string currentDateTime() {
   time_t now = time(0);
   struct tm tstruct;
@@ -90,59 +83,54 @@ const std::string currentDateTime() {
   return buf;
 }
 
-class Classifier {
-public:
-  Classifier(std::string &filename, string &domain) {
-    _model.loadModel(filename.c_str());
-    _domain = domain;
+std::vector<std::pair<fasttext::real, std::string>>
+Classifier::prediction(std::string &text, int count) {
+  std::vector<std::pair<fasttext::real, std::string>> results;
+
+  // @Christophe: is this needed by FastText?
+  // This does not ensure that a '\n' is not present with text end
+  if (text.find("\n") != text.end()-1)
+    text.push_back('\n');
+
+  std::istringstream istr(text);
+  _model.predict(istr, count, results);
+
+  for (auto &r : results) {
+    r.first = exp(r.first);
+    // FastText returns labels like : '__label__XX'
+    r.second = r.second.substr(9);
   }
 
-  vector<pair<fasttext::real, string>> prediction(string &text, int count) {
-    vector<pair<fasttext::real, string>> results;
-    if (text.find("\n") != (int)text.size() - 1)
-      text.push_back('\n');
-    istringstream istr(text);
-    _model.predict(istr, count, results);
-    for (int i = 0; i < (int)results.size(); i++) {
-      results.at(i).first = exp(results.at(i).first);
-      results.at(i).second = results.at(i).second.substr(9);
-    }
-    return results;
-  }
-  std::string getDomain() { return _domain; }
+  return results;
+}
 
-private:
-  std::string _domain;
-  fasttext::FastText _model;
-};
 
-class StatsEndpoint {
-public:
-  StatsEndpoint(Address addr, string classif_config, int debug_mode)
-      : httpEndpoint(std::make_shared<Http::Endpoint>(addr)) {
-    ifstream model_config;
-    string line;
-    _debug_mode = debug_mode;
-    model_config.open(classif_config);
-    //         Classifier * l_classif;
-    while (getline(model_config, line)) {
-      if (line.find("#") != 0) {
-        vector<string> vecline;
-        Split(line, vecline, "\t");
-        //             string domain=line.substr(0,line.find("\t"));
-        //             string file=line.substr(line.find("\t")+1);
-        string domain = vecline[0];
-        string file = vecline[1];
-        int online = 0;
-        if ((int)vecline.size() > 2) {
-          online = atoi(vecline[2].c_str());
-        }
-        cerr << domain << "\t" << file << "\t" << online << endl;
-        _list_classifs.push_back(new Classifier(file, domain));
+StatsEndpoint::StatsEndpoint(Address& addr, std::string& classif_config, int debug){
+  httpEndpoint = std::make_shared<Http::Endpoint>(addr);
+  _debug_mode = debug;
+
+  std::ifstream model_config;
+  model_config.open(classif_config);
+  std::string line;
+
+  while (getline(model_config, line)) {
+    // @Christophe: this excludes every inline comment
+    // WIP
+    if (*line.begin() != '#') {
+      std::vector<std::string> vecline;
+      Split(line, vecline, "\t");
+      string domain = vecline[0];
+      string file = vecline[1];
+      int online = 0;
+      if ((int)vecline.size() > 2) {
+        online = atoi(vecline[2].c_str());
       }
+      cerr << domain << "\t" << file << "\t" << online << endl;
+      _list_classifs.push_back(new Classifier(file, domain));
     }
-    model_config.close();
   }
+  model_config.close();
+}
 
   void init(size_t thr = 2) {
     auto opts = Http::Endpoint::options().threads(thr).flags(
@@ -342,33 +330,4 @@ private:
   Rest::Router router;
 };
 
-int main(int argc, char *argv[]) {
-  Port port(9009);
 
-  int thr = 8;
-  int debug_mode = 0;
-  string model_config_classif("model_classif_config.txt");
-  if (argc >= 2) {
-    port = std::stol(argv[1]);
-    if (argc >= 3) {
-      thr = std::stol(argv[2]);
-      if (argc >= 4) {
-        model_config_classif = string(argv[3]);
-        if (argc >= 5) {
-          debug_mode = atoi(argv[4]);
-        }
-      }
-    }
-  }
-
-  Address addr(Ipv4::any(), port);
-
-  cout << "Cores = " << hardware_concurrency() << endl;
-  cout << "Using " << thr << " threads" << endl;
-
-  StatsEndpoint stats(addr, model_config_classif, debug_mode);
-
-  stats.init(thr);
-  stats.start();
-  stats.shutdown();
-}
