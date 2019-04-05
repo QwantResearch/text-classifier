@@ -1,64 +1,87 @@
-# Qclassification
+# Qnlu
 
-A new Python API for Intention classification at Qwant Research.
-The API is based on fasttext a c++ toolkit for word embeddings and neural classification.
+A new Python API for Intention classification and comprehension at Qwant Research.
+The API is based on fasttext & tensorflow.
 
-Contact: c.servan@qwantresearch.com
+Contact: christophe[dot]servan[at]qwantresearch[dot]com
 
 ## Installation
 
-```  git clone https://github.com/QwantResearch/qclassification.git
-     git clone https://github.com/QwantResearch/qnlp-toolkit.git
-     git clone https://github.com/facebookresearch/fastText.git
-  
-  sudo -H python3 -m pip --upgrade pytest pybind11 falcon requests json wsgiref falcon falcon_cors 
-  
-  pushd fastText && mkdir build && cd build && cmake .. && make -j4 && sudo make install && popd
-  pushd qnlp-toolkit && mkdir build && cd build && cmake .. && make -j4 && sudo make install && popd
-  pushd qclassification/fastText/ && bash compile.bash && popd
-  pushd qclassification/libTokenizer/ && bash cbuild.sh && popd
-  
+### Pre-requieres
+* install qnlp-toolkit (https://github.com/QwantResearch/qnlp-toolkit.git)
+* install fasttext (https://github.com/facebookresearch/fastText.git)
+* install forked version of pistache (https://github.com/QwantResearch/pistache.git)
+* install nlohmann json (https://github.com/nlohmann/json.git)
+* compile tensorflow from source (see next session)
+* compile tensorflow serving from source (https://www.tensorflow.org/serving/setup)
+
+### Install Tensorflow
+
+```
+git clone https://github.com/tensorflow/tensorflow.git ~/tensorflow
+cd ~/tensorflow
+git checkout r1.6
+```
+
+#### Add a custom compilation target at the end of ```tensorflow/BUILD```:
+```
+
+tf_cc_shared_object(
+    name = "libtensorflow_qnlp.so",
+    linkopts = select({
+        "//tensorflow:darwin": [
+            "-Wl,-exported_symbols_list",  # This line must be directly followed by the exported_symbols.lds file
+            "//tensorflow:tf_exported_symbols.lds",
+        ],
+        "//tensorflow:windows": [],
+        "//tensorflow:windows_msvc": [],
+        "//conditions:default": [
+            "-z defs",
+            "-s",
+            "-Wl,--version-script",  #  This line must be directly followed by the version_script.lds file
+            "//tensorflow:tf_version_script.lds",
+        ],
+    }),
+    deps = [
+        "//tensorflow:tf_exported_symbols.lds",
+        "//tensorflow:tf_version_script.lds",
+        "//tensorflow/c:c_api",
+        "//tensorflow/c/eager:c_api",
+        "//tensorflow/cc:cc_ops",
+        "//tensorflow/cc:client_session",
+        "//tensorflow/cc:scope",
+        "//tensorflow/core:tensorflow",
+        "//tensorflow/contrib/seq2seq:beam_search_ops_kernels",
+        "//tensorflow/contrib/seq2seq:beam_search_ops_op_lib",
+    ],
+)
+```
+#### Configure & build
+
+```
+./configure
+bazel build --config=opt //tensorflow:libtensorflow_qnlp.so
+```
+
+### Installation
+
+
+```
+  git clone https://github.com/QwantResearch/qnlu.git 
+  git checkout cpp
+  mkdir -pv build && cd build && cmake .. && make 
 ``` 
+
 
 ## Launch the API
 
-Set up the models in the file `models_config.txt` and set the IP and desired listened port in the file `qclassif_api.py`.
-Then:
+Launch either the API, jointly with TF serving (api_nlu_remote) or locally loaded models (api_nlu_local)
+```
+  ./api_nlu_remote [#port] [#threads] [config filename]
+``` 
+Or 
+``` 
+  ./api_nlu_local [#port] [#threads] [config filename]
 
-```  
-  cd qclassif
-  python3 qclassif_api.py
 ``` 
 
-## Query example
-```
-curl -X POST \
-  http://xx.xx.xx.xx:yyyy/classification \
-  -H 'Authorization: customized-token' \
-  -H 'Cache-Control: no-cache' \
-  -H 'Content-Type: application/json' \
-  -H 'Postman-Token: 0ba004a2-3b50-5019-d788-32aec5e7cbe3' \
-  -d '{"text":"paris reservation chambre","domain":"intention","count":10}'
-  ```
-which returns:
-```
-{
-     "domain": "intention", 
-     "tokenized": "paris reservation chambre", 
-     "result": [
-          ["hotel", 0.9443409442901611], 
-          ["flight", 0.05350146442651749], 
-          ["pagesjaunes", 0.001554204965941608], 
-          ["others", 0.0005534848314709961], 
-          ["maps", 3.014166395587381e-05], 
-          ["shopping", 2.9071170501993038e-05], 
-          ["music", 2.0554260117933154e-05], 
-          ["horaire", 1.9974664610344917e-05], 
-          ["fligth", 1.9753684682655148e-05], 
-          ["movie", 1.7308637325186282e-05]
-     ], 
-     "language": "en", 
-     "text": "paris reservation chambre", 
-     "count": 10
-}
-```
