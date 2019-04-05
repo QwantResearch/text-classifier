@@ -1,31 +1,25 @@
 
 Skip to content
 
-    Pull requests
-    Issues
-    Marketplace
-    Explore
+    Pull requests Issues Marketplace Explore
 
     @cservan
 
-188
-2,329
+    188 2,
+    329
 
-    1,011
+    1,
+    011
 
-tensorflow/serving
-Code
-Issues 207
-Pull requests 11
-Projects 0
-Insights
-serving/tensorflow_serving/example/inception_client.cc
-5a4c59e on 11 Jun
-@tensorflower-gardener tensorflower-gardener Use preferred path grpcpp/ instead of deprecated grpc++/
-@kirilg
-@chrisolston
-@tensorflower-gardener
-146 lines (116 sloc) 5.03 KB
+            tensorflow /
+            serving Code Issues 207 Pull requests 11 Projects 0 Insights
+                serving /
+            tensorflow_serving / example /
+            inception_client.cc 5a4c59e on 11 Jun @tensorflower -
+        gardener tensorflower -
+        gardener Use preferred path grpcpp / instead of deprecated grpc++ /
+            @kirilg @chrisolston @tensorflower -
+        gardener 146 lines(116 sloc) 5.03 KB
 /* Copyright 2017 Google Inc. All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,32 +35,33 @@ limitations under the License.
 #include <fstream>
 #include <iostream>
 
+#include "google/protobuf/map.h"
 #include "grpcpp/create_channel.h"
 #include "grpcpp/security/credentials.h"
-#include "google/protobuf/map.h"
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/platform/types.h"
 #include "tensorflow/core/util/command_line_flags.h"
 #include "tensorflow_serving/apis/prediction_service.grpc.pb.h"
 
-using grpc::Channel;
+        using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
 
+using tensorflow::serving::PredictionService;
 using tensorflow::serving::PredictRequest;
 using tensorflow::serving::PredictResponse;
-using tensorflow::serving::PredictionService;
 
-typedef google::protobuf::Map<tensorflow::string, tensorflow::TensorProto> OutMap;
+typedef google::protobuf::Map<tensorflow::string, tensorflow::TensorProto>
+    OutMap;
 
 class ServingClient {
- public:
+public:
   ServingClient(std::shared_ptr<Channel> channel)
       : stub_(PredictionService::NewStub(channel)) {}
 
-  tensorflow::string callPredict(const tensorflow::string& model_name,
-                                 const tensorflow::string& model_signature_name,
-                                 const tensorflow::string& file_path) {
+  tensorflow::string callPredict(const tensorflow::string &model_name,
+                                 const tensorflow::string &model_signature_name,
+                                 const tensorflow::string &file_path) {
     PredictRequest predictRequest;
     PredictResponse response;
     ClientContext context;
@@ -75,7 +70,7 @@ class ServingClient {
     predictRequest.mutable_model_spec()->set_signature_name(
         model_signature_name);
 
-    google::protobuf::Map<tensorflow::string, tensorflow::TensorProto>& inputs =
+    google::protobuf::Map<tensorflow::string, tensorflow::TensorProto> &inputs =
         *predictRequest.mutable_inputs();
 
     tensorflow::TensorProto proto;
@@ -87,10 +82,10 @@ class ServingClient {
       return "";
     }
 
-    std::filebuf* pbuf = imageFile.rdbuf();
+    std::filebuf *pbuf = imageFile.rdbuf();
     auto fileSize = pbuf->pubseekoff(0, std::ios::end, std::ios::in);
 
-    char* image = new char[fileSize]();
+    char *image = new char[fileSize]();
 
     pbuf->pubseekpos(0, std::ios::in);
     pbuf->sgetn(image, fileSize);
@@ -110,12 +105,12 @@ class ServingClient {
     if (status.ok()) {
       std::cout << "call predict ok" << std::endl;
       std::cout << "outputs size is " << response.outputs_size() << std::endl;
-      OutMap& map_outputs = *response.mutable_outputs();
+      OutMap &map_outputs = *response.mutable_outputs();
       OutMap::iterator iter;
       int output_index = 0;
 
       for (iter = map_outputs.begin(); iter != map_outputs.end(); ++iter) {
-        tensorflow::TensorProto& result_tensor_proto = iter->second;
+        tensorflow::TensorProto &result_tensor_proto = iter->second;
         tensorflow::Tensor tensor;
         bool converted = tensor.FromProto(result_tensor_proto);
         if (converted) {
@@ -136,11 +131,11 @@ class ServingClient {
     }
   }
 
- private:
+private:
   std::unique_ptr<PredictionService::Stub> stub_;
 };
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   tensorflow::string server_port = "localhost:9000";
   tensorflow::string image_file = "";
   tensorflow::string model_name = "inception";
@@ -169,18 +164,8 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-    © 2018 GitHub, Inc.
-    Terms
-    Privacy
-    Security
-    Status
-    Help
+© 2018 GitHub, Inc.Terms Privacy Security Status Help
 
-    Contact GitHub
-    API
-    Training
-    Shop
-    Blog
-    About
+                   Contact GitHub API Training Shop Blog About
 
-Press h to open a hovercard with more details.
+                       Press h to open a hovercard with more details.
