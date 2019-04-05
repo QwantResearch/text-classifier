@@ -1,8 +1,7 @@
-/***************************************************************************
+/*
  * MIT License
  *
- * Copyright (c) 2018 Christophe SERVAN, Qwant Research,
- * email: christophe[dot]servan[at]qwantresearch[dot]com
+ * Copyright (c) 2019 Qwant Research
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,79 +20,37 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- ***************************************************************************/
+ *
+ * Authors:
+ * Christophe Servan <c.servan@qwantresearch.com>
+ * Noel Martin <n.martin@qwantresearch.com>
+ *
+ */
+
 #include "qtokenizer.h"
-using namespace std;
+
 using namespace qnlp;
-qtokenizer::qtokenizer(string &lang) {
+
+qtokenizer::qtokenizer(std::string &lang, bool lowercase) {
+  this->set_tokenizer(lang, lowercase);
+}
+
+void qtokenizer::set_tokenizer(std::string &lang, bool lowercase) {
   _lang = lang;
-  if (lang == "fr") {
-    _fr_tokenizer = new qnlp::Tokenizer_fr(qnlp::Tokenizer::PLAIN, true, false,
-                                           false, false);
-  } else if (lang == "en") {
-    _en_tokenizer = new qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN, true, false,
-                                           false, false);
-  } else {
-    _tokenizer =
-        new qnlp::Tokenizer(qnlp::Tokenizer::PLAIN, true, false, false, false);
-  }
-}
-void qtokenizer::set_tokenizer(string &lang) {
-  _lang = lang;
+
   if (_lang == "fr") {
-    _fr_tokenizer = new qnlp::Tokenizer_fr(qnlp::Tokenizer::PLAIN, true, false,
-                                           false, false);
+    _tokenizer = qnlp::Tokenizer_fr(qnlp::Tokenizer::PLAIN, lowercase, false, false, false);
   } else if (_lang == "en") {
-    _en_tokenizer = new qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN, true, false,
-                                           false, false);
+    _tokenizer = qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN, lowercase, false, false, false);
   } else {
-    _tokenizer =
-        new qnlp::Tokenizer(qnlp::Tokenizer::PLAIN, true, false, false, false);
+    _tokenizer = qnlp::Tokenizer(qnlp::Tokenizer::PLAIN, lowercase, false, false, false);
   }
 }
-qtokenizer::qtokenizer(string &lang, bool lowercase) {
-  _lang = lang;
-  if (lang == "fr") {
-    _fr_tokenizer = new qnlp::Tokenizer_fr(qnlp::Tokenizer::PLAIN, lowercase,
-                                           false, false, false);
-  } else if (lang == "en") {
-    _en_tokenizer = new qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN, lowercase,
-                                           false, false, false);
-  } else {
-    _tokenizer = new qnlp::Tokenizer(qnlp::Tokenizer::PLAIN, lowercase, false,
-                                     false, false);
-  }
+
+std::vector<std::string> qtokenizer::tokenize(std::string &input) {
+  return _tokenizer->tokenize_sentence(input);
 }
-void qtokenizer::set_tokenizer(string &lang, bool lowercase) {
-  _lang = lang;
-  if (_lang == "fr") {
-    _fr_tokenizer = new qnlp::Tokenizer_fr(qnlp::Tokenizer::PLAIN, lowercase,
-                                           false, false, false);
-  } else if (_lang == "en") {
-    _en_tokenizer = new qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN, lowercase,
-                                           false, false, false);
-  } else {
-    _tokenizer = new qnlp::Tokenizer(qnlp::Tokenizer::PLAIN, lowercase, false,
-                                     false, false);
-  }
-}
-vector<string> qtokenizer::tokenize(string &input) {
-  vector<string> to_return;
-  if (_lang == "fr") {
-    to_return = _fr_tokenizer->tokenize_sentence(input);
-  } else if (_lang == "en") {
-    to_return = _en_tokenizer->tokenize_sentence(input);
-  } else {
-    to_return = _tokenizer->tokenize_sentence(input);
-  }
-  return to_return;
-}
-string qtokenizer::tokenize_str(string &input) {
-  if (_lang == "fr") {
-    return _fr_tokenizer->tokenize_sentence_to_string(input);
-  } else if (_lang == "en") {
-    return _en_tokenizer->tokenize_sentence_to_string(input);
-  } else {
-    return _tokenizer->tokenize_sentence_to_string(input);
-  }
+
+std::string qtokenizer::tokenize_str(std::string &input) {
+  return _tokenizer->tokenize_sentence_to_string(input);
 }

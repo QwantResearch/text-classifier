@@ -26,31 +26,28 @@
  * Noel Martin <n.martin@qwantresearch.com>
  *
  */
+
+#ifndef __QTOKENIZER_H
+#define __QTOKENIZER_H
+
 #include <iostream>
 
-#include "qnlp/en_tokenizer.h"
-#include "qnlp/fr_tokenizer.h"
 #include "qnlp/tokenizer.h"
 
 using namespace qnlp;
 
 class qtokenizer {
 public:
-  qtokenizer(std::string &lang, bool lowercase);
-  qtokenizer(std::string &lang);
+  qtokenizer(std::string &lang, bool lowercase = true);
 
-  void set_tokenizer(std::string &lang); // optional arguments
-  void set_tokenizer(std::string &lang, bool lowercase);
+  void set_tokenizer(std::string &lang, bool lowercase = true);
 
-  // why two methods?
   std::vector<std::string> tokenize(std::string &input);
   std::string tokenize_str(std::string &input);
 
 private:
   std::string _lang;
-
-  // why no inheritance?
-  qnlp::Tokenizer *_tokenizer;
-  qnlp::Tokenizer_fr *_fr_tokenizer;
-  qnlp::Tokenizer_en *_en_tokenizer;
+  qnlp::Tokenizer&& _tokenizer;
 };
+
+#endif // __QTOKENIZER_H
