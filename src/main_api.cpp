@@ -32,43 +32,43 @@
 #include "qclassifier.h"
 #include "qtokenizer.h"
 
-int main(int argc, char *argv[]) {
-    Port port(9009);
 
-    int thr = 8;
-    int debug_mode = 0;
-    string model_config_classif("model_classif_config.txt");
-    string model_config_NLU("model_nlu_config.txt");
-    if (argc >= 2) 
-    {
-        port = std::stol(argv[1]);
-        if (argc >= 3)
-        {
-            thr = std::stol(argv[2]);
-            if (argc >= 4)
-            {
-                model_config_classif = string(argv[3]);
-                if (argc >= 5)
-                {
-                    model_config_NLU = string(argv[4]);
-                    if (argc >= 6)
-                    {
-                        debug_mode = atoi(argv[5]);
-                    }
-                }
-            }
-        }
+int main(int argc, char **argv) {
+  Pistache::Port port(9009);
+  int threads(8);
+  std::string model_config("");
+  int debug(0);
+
+  for (int i = 1; i < argc; i += 2) 
+  {
+    if (strcmp(argv[i], "--port") == 0) {
+        port = std::atoi(argv[i+1]);
+    } else if (strcmp(argv[i], "--threads") == 0) {
+        threads = std::atoi(argv[i+1]);
+    } else if (strcmp(argv[i], "--model-path") == 0) {
+        model_config = std::string(argv[i+1]);
+    } else if (strcmp(argv[i], "--debug") == 0) {
+      debug = 1;
+    } else if (strcmp(argv[i], "--help")) {
+      std::cout << "./qclass_server --model-config <filename> [--port <port>] [--threads <nthreads>] [--debug]" << std::endl;
+      return 0;
+    } else {
+      std::cerr << "Unkown option: " << argv[i] << std::endl;
+      std::cerr << "Exiting..." << std::endl;
+      return 1;
     }
+  }
+
 
     Address addr(Ipv4::any(), port);
 
     cout << "Cores = " << hardware_concurrency() << endl;
-    cout << "Using " << thr << " threads" << endl;
+    cout << "Using " << threads << " threads" << endl;
     
 
-    qclass_api classification_api(addr,model_config_classif,model_config_NLU,debug_mode);
+    qclass_api classification_api(addr,model_config,debug);
 
-    classification_api.init(thr);
+    classification_api.init(threads);
     classification_api.start();
     classification_api.shutdown();
 }

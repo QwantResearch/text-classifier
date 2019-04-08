@@ -49,7 +49,7 @@ public:
 
 private:
   std::string _lang;
-  qnlp::Tokenizer &&_tokenizer;
+  qnlp::Tokenizer* _tokenizer;
 };
 
 #endif // __QTOKENIZER_H

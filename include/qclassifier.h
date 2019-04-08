@@ -39,7 +39,7 @@ public:
   qclassifier(std::string &filename, std::string &domain) :
     _domain(domain) { _model.loadModel(filename.c_str()); }
 
-  std::vector<std::pair<fasttext::real, std::string>> prediction(std::string &text, int count);
+  std::vector<std::pair<fasttext::real, std::string>> prediction(std::string text, int count);
   std::string getDomain() { return _domain; }
 
 private:
