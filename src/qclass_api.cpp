@@ -28,6 +28,7 @@
  */
 
 #include "qclass_api.h"
+#include "qclassifier.h"
 
 #include "qtokenizer.h"
 
@@ -48,27 +49,28 @@ void Split(const std::string &line, std::vector<std::string> &pieces,
   size_t pos = 0;
   std::string token;
 
-  while ((pos = line.find(del, begin)) != std::string::npos) {
-    if (pos > begin) {
-      token = line.substr(begin, pos - begin);
-      if (token.size() > 0)
-        pieces.push_back(token);
+  while ((pos = line.find(del, begin)) != std::string::npos) 
+  {
+    if (pos > begin) 
+    {
+        token = line.substr(begin, pos - begin);
+        if (token.size() > 0) pieces.push_back(token);
     }
     begin = pos + del.size();
   }
-  if (pos > begin) {
-    token = line.substr(begin, pos - begin);
+  if (pos > begin) 
+  {
+      token = line.substr(begin, pos - begin);
   }
-  if (token.size() > 0)
-    pieces.push_back(token);
+  if (token.size() > 0) pieces.push_back(token);
 }
 
-namespace Generic {
-
-void handleReady(const Rest::Request &, Http::ResponseWriter response) {
-  response.send(Http::Code::Ok, "1");
-}
-
+namespace Generic 
+{
+    void handleReady(const Rest::Request &, Http::ResponseWriter response) 
+    {
+        response.send(Http::Code::Ok, "1");
+    }
 } // namespace Generic
 
 const std::string currentDateTime() {
@@ -83,30 +85,11 @@ const std::string currentDateTime() {
   return buf;
 }
 
-std::vector<std::pair<fasttext::real, std::string>>
-Classifier::prediction(std::string &text, int count) {
-  std::vector<std::pair<fasttext::real, std::string>> results;
-
-  // @Christophe: is this needed by FastText?
-  // @Noel: yes, it's to avoid a well known bug, which is still not resolved.
-  // This does not ensure that a '\n' is not present with text end
-  if (text.find("\n") != text.end()-1)
-    text.push_back('\n');
-
-  std::istringstream istr(text);
-  _model.predict(istr, count, results);
-
-  for (auto &r : results) {
-    r.first = exp(r.first);
-    // FastText returns labels like : '__label__XX'
-    r.second = r.second.substr(9);
-  }
-
-  return results;
-}
 
 
-StatsEndpoint::StatsEndpoint(Address& addr, std::string& classif_config, int debug){
+
+qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
+{
   httpEndpoint = std::make_shared<Http::Endpoint>(addr);
   _debug_mode = debug;
 
@@ -127,25 +110,26 @@ StatsEndpoint::StatsEndpoint(Address& addr, std::string& classif_config, int deb
         online = atoi(vecline[2].c_str());
       }
       cerr << domain << "\t" << file << "\t" << online << endl;
-      _list_classifs.push_back(new Classifier(file, domain));
+      _list_classifs.push_back(new qclassifier(file, domain));
     }
   }
   model_config.close();
 }
 
-  void init(size_t thr = 2) {
+  void qclass_api::init(size_t thr = 2) 
+  {
     auto opts = Http::Endpoint::options().threads(thr).flags(
         Tcp::Options::InstallSignalHandler);
     httpEndpoint->init(opts);
     setupRoutes();
   }
 
-  void start() {
+  void qclass_api::start() {
     httpEndpoint->setHandler(router.handler());
     httpEndpoint->serve();
   }
 
-  void shutdown() { httpEndpoint->shutdown(); }
+//   void qclass_api::shutdown() { httpEndpoint->shutdown(); }
 
   //     void setLanguage(string lang)
   //     {
@@ -158,23 +142,15 @@ StatsEndpoint::StatsEndpoint(Address& addr, std::string& classif_config, int deb
   //         }
   //     }
 
-private:
-  vector<Classifier *> _list_classifs;
-  FastText clang;
-  FastText cIoT;
-  FastText cint;
-  FastText cshop;
-  int _debug_mode;
-  //    cpr::Response *r;
 
-  void setupRoutes() {
+  void qclass_api::setupRoutes() {
     using namespace Rest;
     Routes::Post(router, "/intention/",
-                 Routes::bind(&StatsEndpoint::doClassificationPost, this));
+                 Routes::bind(&qclass_api::doClassificationPost, this));
     Routes::Get(router, "/intention/",
-                Routes::bind(&StatsEndpoint::doClassificationGet, this));
+                Routes::bind(&qclass_api::doClassificationGet, this));
   }
-  void doClassificationGet(const Rest::Request &request,
+  void qclass_api::doClassificationGet(const Rest::Request &request,
                            Http::ResponseWriter response) {
     response.headers().add<Http::Header::AccessControlAllowHeaders>(
         "Content-Type");
@@ -198,7 +174,7 @@ private:
     //         response.send(Pistache::Http::Code::Ok,
     //         "{\"message\":\"success\"}");
   }
-  void doClassificationDomainsGet(const Rest::Request &request,
+  void qclass_api::doClassificationDomainsGet(const Rest::Request &request,
                                   Http::ResponseWriter response) {
     response.headers().add<Http::Header::AccessControlAllowHeaders>(
         "Content-Type");
@@ -220,7 +196,7 @@ private:
       cerr << "LOG: " << currentDateTime() << "\t" << response_string << endl;
     response.send(Pistache::Http::Code::Ok, response_string);
   }
-  void doClassificationPost(const Rest::Request &request,
+  void qclass_api::doClassificationPost(const Rest::Request &request,
                             Http::ResponseWriter response) {
     response.headers().add<Http::Header::AccessControlAllowHeaders>(
         "Content-Type");
@@ -286,12 +262,12 @@ private:
   }
 
   std::vector<std::pair<fasttext::real, std::string>>
-  askClassification(std::string &text, std::string &domain, int count) {
+  qclass_api::askClassification(std::string &text, std::string &domain, int count) {
     std::vector<std::pair<fasttext::real, std::string>> to_return;
     if ((int)text.size() > 0) {
       auto it_classif =
           std::find_if(_list_classifs.begin(), _list_classifs.end(),
-                       [&](Classifier *l_classif) {
+                       [&](qclassifier *l_classif) {
                          return l_classif->getDomain() == domain;
                        });
       if (it_classif != _list_classifs.end()) {
@@ -300,7 +276,7 @@ private:
     }
     return to_return;
   }
-  bool process_localization(string &input, json &output) {
+  bool qclass_api::process_localization(string &input, json &output) {
     string token(input.c_str());
     if (input.find("à ") == 0)
       token = input.substr(3);
@@ -314,21 +290,14 @@ private:
         nlohmann::json::object_t::value_type(string("label"), token));
   }
 
-  void writeLog(string text_to_log) {}
+//   void qclass_api::writeLog(string text_to_log) {}
 
-  void doAuth(const Rest::Request &request, Http::ResponseWriter response) {
+  void qclass_api::doAuth(const Rest::Request &request, Http::ResponseWriter response) {
     printCookies(request);
     response.cookies().add(Http::Cookie("lang", "fr-FR"));
     response.send(Http::Code::Ok);
   }
 
-  typedef std::mutex Lock;
-  typedef std::lock_guard<Lock> Guard;
-  Lock nluLock;
-  //     std::vector<Classifier> nluDomains;
-
-  std::shared_ptr<Http::Endpoint> httpEndpoint;
-  Rest::Router router;
-};
+// };
 
 

@@ -33,7 +33,7 @@
 #include <algorithm>
 
 #include "qtokenizer.h"
-#include <fasttext/fasttext.h>
+#include "qclassifier.h"
 #include <iostream>
 #include <map>
 #include <nlohmann/json.hpp>
@@ -44,9 +44,9 @@
 #include <sstream>
 #include <time.h>
 
+
 using namespace std;
 using namespace nlohmann;
-using namespace fasttext;
 using namespace Pistache;
 
 void printCookies(const Http::Request &req);
@@ -58,29 +58,18 @@ void handleReady(const Rest::Request &, Http::ResponseWriter response);
 
 const std::string currentDateTime();
 
-class Classifier {
+
+class qclass_api {
+  
 public:
-  Classifier(std::string &filename, std::string &domain) :
-    _domain(domain) { _model.loadModel(filename.c_str()); }
-
-  std::vector<std::pair<fasttext::real, std::string>> prediction(std::string &text, int count);
-  std::string getDomain() { return _domain; }
-
-private:
-  std::string _domain;
-  fasttext::FastText _model;
-};
-
-class StatsEndpoint {
-public:
-  StatsEndpoint(Address addr, string classif_config, int debug_mode = 0);
+  qclass_api(Address addr, string& classif_config, int debug_mode = 0);
  
   void init(size_t thr);
   void start();
   void shutdown() { httpEndpoint->shutdown(); }
 
 private:
-  std::vector<Classifier *> _list_classifs;
+  std::vector<qclassifier *> _list_classifs;
   FastText clang;
   FastText cIoT;
   FastText cint;

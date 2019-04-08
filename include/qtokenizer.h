@@ -33,6 +33,8 @@
 #include <iostream>
 
 #include "qnlp/tokenizer.h"
+#include "qnlp/fr_tokenizer.h"
+#include "qnlp/en_tokenizer.h"
 
 using namespace qnlp;
 
