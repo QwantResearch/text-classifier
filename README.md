@@ -8,10 +8,10 @@ Contact: christophe[dot]servan[at]qwantresearch[dot]com
 ## Installation
 
 ### Pre-requieres
-* install qnlp-toolkit (https://github.com/QwantResearch/qnlp-toolkit.git)
 * install fasttext (https://github.com/facebookresearch/fastText.git)
 * install forked version of pistache (https://github.com/QwantResearch/pistache.git)
 * install nlohmann json (https://github.com/nlohmann/json.git)
+* install qnlp-toolkit (https://github.com/QwantResearch/qnlp-toolkit.git)
 
 
 ### Installation
@@ -28,6 +28,6 @@ Contact: christophe[dot]servan[at]qwantresearch[dot]com
 
 Launch the API:
 ```
-  ./qclass_api [#port] [#threads] [config filename]
+  ./qclass_server [#port] [#threads] [config filename]
 ``` 
 

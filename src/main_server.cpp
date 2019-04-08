@@ -28,7 +28,7 @@
  */
 
 
-#include "qclass_api.h"
+#include "qclass_server.h"
 #include "qclassifier.h"
 #include "qtokenizer.h"
 #include <getopt.h>
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
     cout << "Using config file " << model_config << endl;
     
 
-    qclass_api classification_api(addr,model_config,debug);
+    qclass_server classification_api(addr,model_config,debug);
 
     classification_api.init(threads);
     classification_api.start();

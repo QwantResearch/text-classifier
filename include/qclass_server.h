@@ -59,10 +59,10 @@ void handleReady(const Rest::Request &, Http::ResponseWriter response);
 const std::string currentDateTime();
 
 
-class qclass_api {
+class qclass_server {
   
 public:
-  qclass_api(Address addr, string& classif_config, int debug_mode = 0);
+  qclass_server(Address addr, string& classif_config, int debug_mode = 0);
  
   void init(size_t thr);
   void start();

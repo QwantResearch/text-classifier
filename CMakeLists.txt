@@ -39,8 +39,9 @@ link_directories(/usr/local/lib/)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -lpthread -fpermissive ")
 
 
-set(CLASS_EXECUTABLE_API qclassification_api)
-set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/qclass_api.cpp ${PROJECT_SOURCE_DIR}/src/qtokenizer.cpp ${PROJECT_SOURCE_DIR}/src/qclassifier.cpp ${PROJECT_SOURCE_DIR}/src/main_api.cpp)
+set(CLASS_EXECUTABLE_API qclass_server)
+set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/qclass_server.cpp ${PROJECT_SOURCE_DIR}/src/qtokenizer.cpp ${PROJECT_SOURCE_DIR}/src/qclassifier.cpp ${PROJECT_SOURCE_DIR}/src/main_server.cpp)
 add_executable(${CLASS_EXECUTABLE_API} ${CLASS_SOURCE_API})
 target_link_libraries(${CLASS_EXECUTABLE_API} pistache pthread qnlp fasttext )
+install(TARGETS ${CLASS_EXECUTABLE_API} DESTINATION bin)
 

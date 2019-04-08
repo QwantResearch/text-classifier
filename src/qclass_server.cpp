@@ -27,7 +27,7 @@
  *
  */
 
-#include "qclass_api.h"
+#include "qclass_server.h"
 #include "qclassifier.h"
 
 #include "qtokenizer.h"
@@ -88,7 +88,7 @@ const std::string currentDateTime() {
 
 
 
-qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
+qclass_server::qclass_server(Address addr, std::string& classif_config, int debug)
 {
   httpEndpoint = std::make_shared<Http::Endpoint>(addr);
   _debug_mode = debug;
@@ -116,7 +116,7 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
   model_config.close();
 }
 
-  void qclass_api::init(size_t thr = 2) 
+  void qclass_server::init(size_t thr = 2) 
   {
     auto opts = Http::Endpoint::options().threads(thr).flags(
         Tcp::Options::InstallSignalHandler);
@@ -124,13 +124,13 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
     setupRoutes();
   }
 
-  void qclass_api::start() {
+  void qclass_server::start() {
     httpEndpoint->setHandler(router.handler());
     httpEndpoint->serve();
     httpEndpoint->shutdown();
   }
 
-//   void qclass_api::shutdown() { httpEndpoint->shutdown(); }
+//   void qclass_server::shutdown() { httpEndpoint->shutdown(); }
 
   //     void setLanguage(string lang)
   //     {
@@ -144,16 +144,16 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
   //     }
 
 
-  void qclass_api::setupRoutes() 
+  void qclass_server::setupRoutes() 
   {
     using namespace Rest;
     Routes::Post(router, "/intention/",
-                 Routes::bind(&qclass_api::doClassificationPost, this));
+                 Routes::bind(&qclass_server::doClassificationPost, this));
     Routes::Get(router, "/intention/",
-                Routes::bind(&qclass_api::doClassificationGet, this));
+                Routes::bind(&qclass_server::doClassificationGet, this));
   }
   
-  void qclass_api::doClassificationGet(const Rest::Request &request, Http::ResponseWriter response) 
+  void qclass_server::doClassificationGet(const Rest::Request &request, Http::ResponseWriter response) 
   {
     response.headers().add<Http::Header::AccessControlAllowHeaders>("Content-Type");
     response.headers().add<Http::Header::AccessControlAllowMethods>("GET, POST, DELETE, OPTIONS");
@@ -174,7 +174,7 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
     //         response.send(Pistache::Http::Code::Ok,
     //         "{\"message\":\"success\"}");
   }
-  void qclass_api::doClassificationDomainsGet(const Rest::Request &request, Http::ResponseWriter response) 
+  void qclass_server::doClassificationDomainsGet(const Rest::Request &request, Http::ResponseWriter response) 
   {
     response.headers().add<Http::Header::AccessControlAllowHeaders>("Content-Type");
     response.headers().add<Http::Header::AccessControlAllowMethods>("GET, POST, DELETE, OPTIONS");
@@ -194,7 +194,7 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
       cerr << "LOG: " << currentDateTime() << "\t" << response_string << endl;
     response.send(Pistache::Http::Code::Ok, response_string);
   }
-  void qclass_api::doClassificationPost(const Rest::Request &request,
+  void qclass_server::doClassificationPost(const Rest::Request &request,
                             Http::ResponseWriter response) {
     response.headers().add<Http::Header::AccessControlAllowHeaders>(
         "Content-Type");
@@ -260,7 +260,7 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
   }
 
   std::vector<std::pair<fasttext::real, std::string>>
-  qclass_api::askClassification(std::string &text, std::string &domain, int count) {
+  qclass_server::askClassification(std::string &text, std::string &domain, int count) {
     std::vector<std::pair<fasttext::real, std::string>> to_return;
     if ((int)text.size() > 0) {
       auto it_classif =
@@ -274,7 +274,7 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
     }
     return to_return;
   }
-  bool qclass_api::process_localization(string &input, json &output) {
+  bool qclass_server::process_localization(string &input, json &output) {
     string token(input.c_str());
     if (input.find("à ") == 0)
       token = input.substr(3);
@@ -288,9 +288,9 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
         nlohmann::json::object_t::value_type(string("label"), token));
   }
 
-//   void qclass_api::writeLog(string text_to_log) {}
+//   void qclass_server::writeLog(string text_to_log) {}
 
-  void qclass_api::doAuth(const Rest::Request &request, Http::ResponseWriter response) {
+  void qclass_server::doAuth(const Rest::Request &request, Http::ResponseWriter response) {
     printCookies(request);
     response.cookies().add(Http::Cookie("lang", "fr-FR"));
     response.send(Http::Code::Ok);
