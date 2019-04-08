@@ -31,6 +31,8 @@
 #define __QCLASSIFIER_H
 
 #include <fasttext/fasttext.h>
+#include <sstream>
+
 using namespace fasttext;
 
 
@@ -39,7 +41,7 @@ public:
   qclassifier(std::string &filename, std::string &domain) :
     _domain(domain) { _model.loadModel(filename.c_str()); }
 
-  std::vector<std::pair<fasttext::real, std::string>> prediction(std::string text, int count);
+  std::vector<std::pair<fasttext::real, std::string>> prediction(std::__cxx11::string& text, int count);
   std::string getDomain() { return _domain; }
 
 private:
