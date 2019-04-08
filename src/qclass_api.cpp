@@ -88,6 +88,7 @@ Classifier::prediction(std::string &text, int count) {
   std::vector<std::pair<fasttext::real, std::string>> results;
 
   // @Christophe: is this needed by FastText?
+  // @Noel: yes, it's to avoid a well known bug, which is still not resolved.
   // This does not ensure that a '\n' is not present with text end
   if (text.find("\n") != text.end()-1)
     text.push_back('\n');
