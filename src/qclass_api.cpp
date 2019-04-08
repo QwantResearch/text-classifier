@@ -127,6 +127,7 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
   void qclass_api::start() {
     httpEndpoint->setHandler(router.handler());
     httpEndpoint->serve();
+    httpEndpoint->shutdown();
   }
 
 //   void qclass_api::shutdown() { httpEndpoint->shutdown(); }
