@@ -28,6 +28,6 @@ Contact: christophe[dot]servan[at]qwantresearch[dot]com
 
 Launch the API:
 ```
-  ./api_classification [#port] [#threads] [config filename]
+  ./qclass_api [#port] [#threads] [config filename]
 ``` 
 
