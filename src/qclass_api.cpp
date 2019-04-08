@@ -143,43 +143,40 @@ qclass_api::qclass_api(Address addr, std::string& classif_config, int debug)
   //     }
 
 
-  void qclass_api::setupRoutes() {
+  void qclass_api::setupRoutes() 
+  {
     using namespace Rest;
     Routes::Post(router, "/intention/",
                  Routes::bind(&qclass_api::doClassificationPost, this));
     Routes::Get(router, "/intention/",
                 Routes::bind(&qclass_api::doClassificationGet, this));
   }
-  void qclass_api::doClassificationGet(const Rest::Request &request,
-                           Http::ResponseWriter response) {
-    response.headers().add<Http::Header::AccessControlAllowHeaders>(
-        "Content-Type");
-    response.headers().add<Http::Header::AccessControlAllowMethods>(
-        "GET, POST, DELETE, OPTIONS");
+  
+  void qclass_api::doClassificationGet(const Rest::Request &request, Http::ResponseWriter response) 
+  {
+    response.headers().add<Http::Header::AccessControlAllowHeaders>("Content-Type");
+    response.headers().add<Http::Header::AccessControlAllowMethods>("GET, POST, DELETE, OPTIONS");
     response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     string response_string = "{\"domains\":[";
-    for (int inc = 0; inc < (int)_list_classifs.size(); inc++) {
+    for (int inc = 0; inc < (int)_list_classifs.size(); inc++) 
+    {
       //             cerr << _list_classifs.at(inc)->getDomain() << endl;
-      if (inc > 0)
-        response_string.append(",");
+      if (inc > 0) response_string.append(",");
       response_string.append("\"");
       response_string.append(_list_classifs.at(inc)->getDomain());
       response_string.append("\"");
     }
     response_string.append("]}");
-    if (_debug_mode != 0)
-      cerr << "LOG: " << currentDateTime() << "\t" << response_string << endl;
+    if (_debug_mode != 0) cerr << "LOG: " << currentDateTime() << "\t" << response_string << endl;
     response.send(Pistache::Http::Code::Ok, response_string);
     //         response.send(Pistache::Http::Code::Ok,
     //         "{\"message\":\"success\"}");
   }
-  void qclass_api::doClassificationDomainsGet(const Rest::Request &request,
-                                  Http::ResponseWriter response) {
-    response.headers().add<Http::Header::AccessControlAllowHeaders>(
-        "Content-Type");
-    response.headers().add<Http::Header::AccessControlAllowMethods>(
-        "GET, POST, DELETE, OPTIONS");
+  void qclass_api::doClassificationDomainsGet(const Rest::Request &request, Http::ResponseWriter response) 
+  {
+    response.headers().add<Http::Header::AccessControlAllowHeaders>("Content-Type");
+    response.headers().add<Http::Header::AccessControlAllowMethods>("GET, POST, DELETE, OPTIONS");
     response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     string response_string = "{\"domains\":[";
