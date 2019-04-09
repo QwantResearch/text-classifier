@@ -1,4 +1,4 @@
-# Qclassification
+#Qclassification
 
 A new CPP API for Intention classification at Qwant Research.
 The API is based on fasttext.
@@ -29,5 +29,4 @@ Contact: christophe[dot]servan[at]qwantresearch[dot]com
 Launch the API:
 ```
   ./qclass_server [#port] [#threads] [config filename]
-``` 
-
+```

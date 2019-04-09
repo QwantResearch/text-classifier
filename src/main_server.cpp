@@ -27,54 +27,46 @@
  *
  */
 
-
 #include "qclass_server.h"
 #include "qclassifier.h"
 #include "qtokenizer.h"
 #include <getopt.h>
 
-
-
-int num_port=9009;
-int threads=1;
-int debug=0;
+int num_port = 9009;
+int threads = 1;
+int debug = 0;
 std::string model_config("");
 
 void usage()
 {
-    cout << "./qclass_server --model-config <filename> [--port <port>] [--threads <nthreads>] [--debug]\n\n"
+    cout << "./qclass_server --model-config <filename> [--port <port>] "
+            "[--threads <nthreads>] [--debug]\n\n"
             "\t--port (-p)              port to use (default 9009)\n"
             "\t--threads (-t)           number of threads (default 1)\n"
-            "\t--model-config (-f)      config file in which all models are described (needed)\n"
+            "\t--model-config (-f)      config file in which all models are "
+            "described (needed)\n"
             "\t--debug (-d)             debug mode (default false)\n"
             "\t--help (-h)              Show this message\n"
-            << endl;
+         << endl;
     exit(1);
 }
-
-
 
 void ProcessArgs(int argc, char** argv)
 {
     const char* const short_opts = "p:t:f:dh";
     const option long_opts[] = {
-            {"port", 1, nullptr, 'p'},
-            {"threads", 1, nullptr, 't'},
-            {"model-config", 1, nullptr, 'f'},
-            {"debug", 0, nullptr, 'd'},
-            {"help", 0, nullptr, 'h'},
-            {nullptr, 0, nullptr, 0}
+        { "port", 1, nullptr, 'p' }, { "threads", 1, nullptr, 't' },
+        { "model-config", 1, nullptr, 'f' }, { "debug", 0, nullptr, 'd' },
+        { "help", 0, nullptr, 'h' }, { nullptr, 0, nullptr, 0 }
     };
 
-    while (true)
-    {
+    while (true) {
         const auto opt = getopt_long(argc, argv, short_opts, long_opts, nullptr);
 
         if (-1 == opt)
             break;
 
-        switch (opt)
-        {
+        switch (opt) {
         case 'p':
             num_port = atoi(optarg);
             break;
@@ -91,7 +83,6 @@ void ProcessArgs(int argc, char** argv)
             model_config = optarg;
             break;
 
-
         case 'h': // -h or --help
         case '?': // Unrecognized option
         default:
@@ -99,36 +90,34 @@ void ProcessArgs(int argc, char** argv)
             break;
         }
     }
-    if (model_config == "")
-    {
-        cerr << "Error, you must set a config file" <<endl;
+    if (model_config == "") {
+        cerr << "Error, you must set a config file" << endl;
         usage();
         exit(1);
     }
 }
 
-
-
-int main(int argc, char **argv) {
-//   for (int i = 1; i < argc; i += 2) 
-//   {
-//     if (strcmp(argv[i], "--port") == 0) {
-//         port = std::atoi(argv[i+1]);
-//     } else if (strcmp(argv[i], "--threads") == 0) {
-//         threads = std::atoi(argv[i+1]);
-//     } else if (strcmp(argv[i], "--model-path") == 0) {
-//         model_config = std::string(argv[i+1]);
-//     } else if (strcmp(argv[i], "--debug") == 0) {
-//       debug = 1;
-//     } else if (strcmp(argv[i], "--help")) {
-//       std::cout << "./qclass_server --model-config <filename> [--port <port>] [--threads <nthreads>] [--debug]" << std::endl;
-//       return 0;
-//     } else {
-//       std::cerr << "Unkown option: " << argv[i] << std::endl;
-//       std::cerr << "Exiting..." << std::endl;
-//       return 1;
-//     }
-//   }
+int main(int argc, char** argv)
+{
+    //   for (int i = 1; i < argc; i += 2)
+    //   {
+    //     if (strcmp(argv[i], "--port") == 0) {
+    //         port = std::atoi(argv[i+1]);
+    //     } else if (strcmp(argv[i], "--threads") == 0) {
+    //         threads = std::atoi(argv[i+1]);
+    //     } else if (strcmp(argv[i], "--model-path") == 0) {
+    //         model_config = std::string(argv[i+1]);
+    //     } else if (strcmp(argv[i], "--debug") == 0) {
+    //       debug = 1;
+    //     } else if (strcmp(argv[i], "--help")) {
+    //       std::cout << "./qclass_server --model-config <filename> [--port
+    //       <port>] [--threads <nthreads>] [--debug]" << std::endl; return 0;
+    //     } else {
+    //       std::cerr << "Unkown option: " << argv[i] << std::endl;
+    //       std::cerr << "Exiting..." << std::endl;
+    //       return 1;
+    //     }
+    //   }
     ProcessArgs(argc, argv);
     Pistache::Port port(num_port);
 
@@ -138,9 +127,8 @@ int main(int argc, char **argv) {
     cout << "Using " << threads << " threads" << endl;
     cout << "Using port " << port << endl;
     cout << "Using config file " << model_config << endl;
-    
 
-    qclass_server classification_api(addr,model_config,debug);
+    qclass_server classification_api(addr, model_config, debug);
 
     classification_api.init(threads);
     classification_api.start();

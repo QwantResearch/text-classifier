@@ -1,1 +1,1 @@
-language_identification	resources/lid.176.ftz	0
+language_identification resources / lid .176.ftz 0
