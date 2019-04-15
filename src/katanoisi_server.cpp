@@ -1,9 +1,10 @@
 // Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
 
-#include "qclass_server.h"
-#include "qclassifier.h"
-#include "qtokenizer.h"
+#include <iostream>
+#include <string>
 #include <getopt.h>
+
+#include "katanoisi/rest_server.h"
 
 int num_port = 9009;
 int threads = 1;
@@ -82,7 +83,7 @@ int main(int argc, char** argv)
     cout << "Using port " << port << endl;
     cout << "Using config file " << model_config << endl;
 
-    qclass_server classification_api(addr, model_config, debug);
+    rest_server classification_api(addr, model_config, debug);
 
     classification_api.init(threads);
     classification_api.start();
