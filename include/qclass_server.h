@@ -4,9 +4,6 @@
 #define __QCLASS_API_H
 
 #include <algorithm>
-
-#include "qtokenizer.h"
-#include "qclassifier.h"
 #include <iostream>
 #include <map>
 #include <nlohmann/json.hpp>
@@ -17,46 +14,37 @@
 #include <sstream>
 #include <time.h>
 
+#include "katanoisi/qclassifier.h"
+#include "katanoisi/qtokenizer.h"
 
 using namespace std;
 using namespace nlohmann;
 using namespace Pistache;
-
-void printCookies(const Http::Request &req);
-void Split(const std::string &line, std::vector<std::string> &pieces, const std::string del);
-
-namespace Generic {
-void handleReady(const Rest::Request &, Http::ResponseWriter response);
-} // namespace Generic
-
-const std::string currentDateTime();
-
 
 class qclass_server {
   
 public:
   qclass_server(Address addr, string& classif_config, int debug_mode = 0);
  
-  void init(size_t thr);
+  void init(size_t thr = 2);
   void start();
   void shutdown() { httpEndpoint->shutdown(); }
 
 private:
-  std::vector<qclassifier *> _list_classifs;
-  FastText clang;
-  FastText cIoT;
-  FastText cint;
-  FastText cshop;
   int _debug_mode;
+  std::vector<qclassifier *> _list_classifs;
+  std::shared_ptr<Http::Endpoint> httpEndpoint;
+  Rest::Router router;
+  typedef std::mutex Lock;
+  typedef std::lock_guard<Lock> Guard;
+  Lock nluLock;
 
   void setupRoutes();
+
 
   void doClassificationGet(const Rest::Request &request,
                            Http::ResponseWriter response);
 
-  void doClassificationDomainsGet(const Rest::Request &request,
-                                  Http::ResponseWriter response);
-  
   void doClassificationPost(const Rest::Request &request,
                             Http::ResponseWriter response);
 
@@ -69,11 +57,6 @@ private:
 
   void doAuth(const Rest::Request &request, Http::ResponseWriter response);
 
-  typedef std::mutex Lock;
-  typedef std::lock_guard<Lock> Guard;
-  Lock nluLock;
-  std::shared_ptr<Http::Endpoint> httpEndpoint;
-  Rest::Router router;
 };
 
 #endif // __QCLASS_API_H

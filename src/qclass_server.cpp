@@ -1,65 +1,7 @@
 // Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
 
-#include "qclass_server.h"
-#include "qclassifier.h"
-
-#include "qtokenizer.h"
-
-void printCookies(const Http::Request& req)
-{
-    auto cookies = req.cookies();
-    const std::string indent(4, ' ');
-
-    std::cout << "Cookies: [" << std::endl;
-    for (const auto& c : cookies) {
-        std::cout << indent << c.name << " = " << c.value << std::endl;
-    }
-    std::cout << "]" << std::endl;
-}
-
-void Split(const std::string& line,
-    std::vector<std::string>& pieces,
-    const std::string del)
-{
-    size_t begin = 0;
-    size_t pos = 0;
-    std::string token;
-
-    while ((pos = line.find(del, begin)) != std::string::npos) {
-        if (pos > begin) {
-            token = line.substr(begin, pos - begin);
-            if (token.size() > 0)
-                pieces.push_back(token);
-        }
-        begin = pos + del.size();
-    }
-    if (pos > begin) {
-        token = line.substr(begin, pos - begin);
-    }
-    if (token.size() > 0)
-        pieces.push_back(token);
-}
-
-namespace Generic {
-void handleReady(const Rest::Request&, Http::ResponseWriter response)
-{
-    response.send(Http::Code::Ok, "1");
-}
-} // namespace Generic
-
-const std::string
-currentDateTime()
-{
-    time_t now = time(0);
-    struct tm tstruct;
-    char buf[80];
-    tstruct = *localtime(&now);
-    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
-    // for more information about date/time format
-    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
-
-    return buf;
-}
+#include "katanoisi/qclass_server.h"
+#include "katanoisi/utils.h"
 
 qclass_server::qclass_server(Address addr,
     std::string& classif_config,
@@ -91,7 +33,7 @@ qclass_server::qclass_server(Address addr,
     model_config.close();
 }
 
-void qclass_server::init(size_t thr = 2)
+void qclass_server::init(size_t thr)
 {
     auto opts = Http::Endpoint::options().threads(thr).flags(
         Tcp::Options::InstallSignalHandler);
@@ -106,25 +48,14 @@ void qclass_server::start()
     httpEndpoint->shutdown();
 }
 
-//   void qclass_server::shutdown() { httpEndpoint->shutdown(); }
-
-//     void setLanguage(string lang)
-//     {
-//         if (tokenizers.find(lang) != tokenizers.end())
-//         {
-//             qtokenizer* l_qutok= new qtokenizer(lang);
-//
-//             pair<string,qtokenizer*> l_pair(lang,l_qutok);
-//             tokenizers.insert(l_pair);
-//         }
-//     }
-
 void qclass_server::setupRoutes()
 {
     using namespace Rest;
+
     Routes::Post(router,
         "/intention/",
         Routes::bind(&qclass_server::doClassificationPost, this));
+
     Routes::Get(router,
         "/intention/",
         Routes::bind(&qclass_server::doClassificationGet, this));
@@ -141,32 +72,6 @@ void qclass_server::doClassificationGet(const Rest::Request& request,
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     string response_string = "{\"domains\":[";
     for (int inc = 0; inc < (int)_list_classifs.size(); inc++) {
-        //             cerr << _list_classifs.at(inc)->getDomain() << endl;
-        if (inc > 0)
-            response_string.append(",");
-        response_string.append("\"");
-        response_string.append(_list_classifs.at(inc)->getDomain());
-        response_string.append("\"");
-    }
-    response_string.append("]}");
-    if (_debug_mode != 0)
-        cerr << "LOG: " << currentDateTime() << "\t" << response_string << endl;
-    response.send(Pistache::Http::Code::Ok, response_string);
-    //         response.send(Pistache::Http::Code::Ok,
-    //         "{\"message\":\"success\"}");
-}
-void qclass_server::doClassificationDomainsGet(const Rest::Request& request,
-    Http::ResponseWriter response)
-{
-    response.headers().add<Http::Header::AccessControlAllowHeaders>(
-        "Content-Type");
-    response.headers().add<Http::Header::AccessControlAllowMethods>(
-        "GET, POST, DELETE, OPTIONS");
-    response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
-    response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-    string response_string = "{\"domains\":[";
-    for (int inc = 0; inc < (int)_list_classifs.size(); inc++) {
-        //             cerr << _list_classifs.at(inc)->getDomain() << endl;
         if (inc > 0)
             response_string.append(",");
         response_string.append("\"");
@@ -178,6 +83,7 @@ void qclass_server::doClassificationDomainsGet(const Rest::Request& request,
         cerr << "LOG: " << currentDateTime() << "\t" << response_string << endl;
     response.send(Pistache::Http::Code::Ok, response_string);
 }
+
 void qclass_server::doClassificationPost(const Rest::Request& request,
     Http::ResponseWriter response)
 {
@@ -274,8 +180,6 @@ bool qclass_server::process_localization(string& input, json& output)
         nlohmann::json::object_t::value_type(string("label"), token));
 }
 
-//   void qclass_server::writeLog(string text_to_log) {}
-
 void qclass_server::doAuth(const Rest::Request& request,
     Http::ResponseWriter response)
 {
@@ -283,5 +187,3 @@ void qclass_server::doAuth(const Rest::Request& request,
     response.cookies().add(Http::Cookie("lang", "fr-FR"));
     response.send(Http::Code::Ok);
 }
-
-// };
