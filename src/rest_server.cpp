@@ -25,7 +25,7 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
         online = atoi(vecline[2].c_str());
       }
       cerr << domain << "\t" << file << "\t" << online << endl;
-      _list_classifs.push_back(new qclassifier(file, domain));
+      _list_classifs.push_back(new classifier(file, domain));
     }
   }
   model_config.close();
@@ -145,7 +145,7 @@ rest_server::askClassification(std::string &text, std::string &domain,
   std::vector<std::pair<fasttext::real, std::string>> to_return;
   if ((int)text.size() > 0) {
     auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(),
-                                   [&](qclassifier *l_classif) {
+                                   [&](classifier *l_classif) {
                                      return l_classif->getDomain() == domain;
                                    });
     if (it_classif != _list_classifs.end()) {
