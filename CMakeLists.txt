@@ -1,23 +1,25 @@
-###########################################################################
-#
 # Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
-# 
-###########################################################################
+
 cmake_minimum_required(VERSION 3.5)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -fpermissive ")
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
-include_directories(${PROJECT_SOURCE_DIR}/include  /usr/local/include/)
+include_directories(${PROJECT_SOURCE_DIR}/include/katanoisi /usr/local/include/)
 link_directories(/usr/local/lib/)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++11 -lpthread -fpermissive ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -lpthread -fpermissive ")
 
+set(CLASS_EXECUTABLE_API katanoisi_server)
 
-set(CLASS_EXECUTABLE_API qclass_server)
-set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/qclass_server.cpp ${PROJECT_SOURCE_DIR}/src/qtokenizer.cpp ${PROJECT_SOURCE_DIR}/src/qclassifier.cpp ${PROJECT_SOURCE_DIR}/src/main_server.cpp)
+set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/katanoisi_server.cpp
+                     ${PROJECT_SOURCE_DIR}/src/rest_server.cpp
+                     ${PROJECT_SOURCE_DIR}/src/tokenizer.cpp
+                     ${PROJECT_SOURCE_DIR}/src/qclassifier.cpp)
+
 add_executable(${CLASS_EXECUTABLE_API} ${CLASS_SOURCE_API})
-target_link_libraries(${CLASS_EXECUTABLE_API} pistache pthread qnlp fasttext )
-install(TARGETS ${CLASS_EXECUTABLE_API} DESTINATION bin)
 
+target_link_libraries(${CLASS_EXECUTABLE_API} pistache pthread qnlp fasttext)
+
+install(TARGETS ${CLASS_EXECUTABLE_API} DESTINATION bin)
