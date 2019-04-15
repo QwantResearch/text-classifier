@@ -1,9 +1,9 @@
 // Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
 
-#include "katanoisi/qclass_server.h"
+#include "katanoisi/rest_server.h"
 #include "katanoisi/utils.h"
 
-qclass_server::qclass_server(Address addr,
+rest_server::rest_server(Address addr,
     std::string& classif_config,
     int debug)
 {
@@ -33,7 +33,7 @@ qclass_server::qclass_server(Address addr,
     model_config.close();
 }
 
-void qclass_server::init(size_t thr)
+void rest_server::init(size_t thr)
 {
     auto opts = Http::Endpoint::options().threads(thr).flags(
         Tcp::Options::InstallSignalHandler);
@@ -41,27 +41,27 @@ void qclass_server::init(size_t thr)
     setupRoutes();
 }
 
-void qclass_server::start()
+void rest_server::start()
 {
     httpEndpoint->setHandler(router.handler());
     httpEndpoint->serve();
     httpEndpoint->shutdown();
 }
 
-void qclass_server::setupRoutes()
+void rest_server::setupRoutes()
 {
     using namespace Rest;
 
     Routes::Post(router,
         "/intention/",
-        Routes::bind(&qclass_server::doClassificationPost, this));
+        Routes::bind(&rest_server::doClassificationPost, this));
 
     Routes::Get(router,
         "/intention/",
-        Routes::bind(&qclass_server::doClassificationGet, this));
+        Routes::bind(&rest_server::doClassificationGet, this));
 }
 
-void qclass_server::doClassificationGet(const Rest::Request& request,
+void rest_server::doClassificationGet(const Rest::Request& request,
     Http::ResponseWriter response)
 {
     response.headers().add<Http::Header::AccessControlAllowHeaders>(
@@ -84,7 +84,7 @@ void qclass_server::doClassificationGet(const Rest::Request& request,
     response.send(Pistache::Http::Code::Ok, response_string);
 }
 
-void qclass_server::doClassificationPost(const Rest::Request& request,
+void rest_server::doClassificationPost(const Rest::Request& request,
     Http::ResponseWriter response)
 {
     response.headers().add<Http::Header::AccessControlAllowHeaders>(
@@ -149,7 +149,7 @@ void qclass_server::doClassificationPost(const Rest::Request& request,
 }
 
 std::vector<std::pair<fasttext::real, std::string>>
-qclass_server::askClassification(std::string& text,
+rest_server::askClassification(std::string& text,
     std::string& domain,
     int count)
 {
@@ -165,7 +165,7 @@ qclass_server::askClassification(std::string& text,
     }
     return to_return;
 }
-bool qclass_server::process_localization(string& input, json& output)
+bool rest_server::process_localization(string& input, json& output)
 {
     string token(input.c_str());
     if (input.find("à ") == 0)
@@ -180,7 +180,7 @@ bool qclass_server::process_localization(string& input, json& output)
         nlohmann::json::object_t::value_type(string("label"), token));
 }
 
-void qclass_server::doAuth(const Rest::Request& request,
+void rest_server::doAuth(const Rest::Request& request,
     Http::ResponseWriter response)
 {
     printCookies(request);

@@ -15,16 +15,16 @@
 #include <time.h>
 
 #include "katanoisi/qclassifier.h"
-#include "katanoisi/qtokenizer.h"
+#include "katanoisi/tokenizer.h"
 
 using namespace std;
 using namespace nlohmann;
 using namespace Pistache;
 
-class qclass_server {
+class rest_server {
   
 public:
-  qclass_server(Address addr, string& classif_config, int debug_mode = 0);
+  rest_server(Address addr, string& classif_config, int debug_mode = 0);
  
   void init(size_t thr = 2);
   void start();
