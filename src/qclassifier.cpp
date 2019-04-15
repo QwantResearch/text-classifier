@@ -34,16 +34,9 @@ qclassifier::prediction(std::string& text, int count)
 {
     std::vector<std::pair<fasttext::real, std::string>> results;
 
-    // @Christophe: is this needed by FastText?
-    // @Noel: yes, it's to avoid a well known bug, which is still not resolved.
-    // This does not ensure that a '\n' is not present with text end
-    int s_it = text.rfind('\n');
-    if (s_it != (int)text.size() - 1)
-        text.push_back('\n');
+    if (*(text.end()-1) != '\n')
+      text.push_back('\n');
 
-    //   std::istringstream istr(std::string(text));
-    //   std::istream istr(std::string(text).c_str());
-    //   std::istream istr();
     std::stringstream istr(text);
     _model.predictLine(istr, results, count, 0.0);
 
