@@ -1,8 +1,8 @@
 // Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0
 // license. See LICENSE in the project root.
 
-#ifndef __QCLASS_API_H
-#define __QCLASS_API_H
+#ifndef __REST_SERVER_H
+#define __REST_SERVER_H
 
 #include <algorithm>
 #include <iostream>
@@ -15,7 +15,7 @@
 #include <sstream>
 #include <time.h>
 
-#include "katanoisi/qclassifier.h"
+#include "katanoisi/classifier.h"
 #include "katanoisi/tokenizer.h"
 
 using namespace std;
@@ -33,7 +33,7 @@ public:
 
 private:
   int _debug_mode;
-  std::vector<qclassifier *> _list_classifs;
+  std::vector<classifier *> _list_classifs;
   std::shared_ptr<Http::Endpoint> httpEndpoint;
   Rest::Router router;
   typedef std::mutex Lock;
@@ -58,4 +58,4 @@ private:
   void doAuth(const Rest::Request &request, Http::ResponseWriter response);
 };
 
-#endif // __QCLASS_API_H
+#endif // __REST_SERVER_H
