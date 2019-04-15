@@ -1,4 +1,5 @@
-// Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
+// Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0
+// license. See LICENSE in the project root.
 
 #ifndef __QCLASS_API_H
 #define __QCLASS_API_H
@@ -22,10 +23,10 @@ using namespace nlohmann;
 using namespace Pistache;
 
 class rest_server {
-  
+
 public:
-  rest_server(Address addr, string& classif_config, int debug_mode = 0);
- 
+  rest_server(Address addr, string &classif_config, int debug_mode = 0);
+
   void init(size_t thr = 2);
   void start();
   void shutdown() { httpEndpoint->shutdown(); }
@@ -41,7 +42,6 @@ private:
 
   void setupRoutes();
 
-
   void doClassificationGet(const Rest::Request &request,
                            Http::ResponseWriter response);
 
@@ -56,7 +56,6 @@ private:
   void writeLog(string text_to_log) {}
 
   void doAuth(const Rest::Request &request, Http::ResponseWriter response);
-
 };
 
 #endif // __QCLASS_API_H
