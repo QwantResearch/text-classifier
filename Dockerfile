@@ -1,3 +1,5 @@
+# Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
+
 FROM ubuntu:18.04
 
 LABEL maintainer="n.martin@qwantresearch.com"
