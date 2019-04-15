@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -lpthread -fpermissive ")
 
 set(CLASS_EXECUTABLE_API katanoisi_server)
 
-set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/katanoisi_server.cpp
+set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/katanoisi.cpp
                      ${PROJECT_SOURCE_DIR}/src/rest_server.cpp
                      ${PROJECT_SOURCE_DIR}/src/tokenizer.cpp
                      ${PROJECT_SOURCE_DIR}/src/qclassifier.cpp)
