@@ -6,7 +6,9 @@ The API is based on fasttext.
 
 Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
 
-Contact: christophe[dot]servan[at]qwantresearch[dot]com ; n[dot]martin[at]qwant[dot]com
+Contact:
+ - christophe[dot]servan[at]qwantresearch[dot]com
+ - n[dot]martin[at]qwantresearch[dot]com
 
 ## Installation
 
