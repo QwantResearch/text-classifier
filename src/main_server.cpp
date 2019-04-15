@@ -99,25 +99,6 @@ void ProcessArgs(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    //   for (int i = 1; i < argc; i += 2)
-    //   {
-    //     if (strcmp(argv[i], "--port") == 0) {
-    //         port = std::atoi(argv[i+1]);
-    //     } else if (strcmp(argv[i], "--threads") == 0) {
-    //         threads = std::atoi(argv[i+1]);
-    //     } else if (strcmp(argv[i], "--model-path") == 0) {
-    //         model_config = std::string(argv[i+1]);
-    //     } else if (strcmp(argv[i], "--debug") == 0) {
-    //       debug = 1;
-    //     } else if (strcmp(argv[i], "--help")) {
-    //       std::cout << "./qclass_server --model-config <filename> [--port
-    //       <port>] [--threads <nthreads>] [--debug]" << std::endl; return 0;
-    //     } else {
-    //       std::cerr << "Unkown option: " << argv[i] << std::endl;
-    //       std::cerr << "Exiting..." << std::endl;
-    //       return 1;
-    //     }
-    //   }
     ProcessArgs(argc, argv);
     Pistache::Port port(num_port);
 
