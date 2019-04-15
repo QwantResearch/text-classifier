@@ -16,7 +16,8 @@ set(CLASS_EXECUTABLE_API katanoisi_server)
 set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/katanoisi.cpp
                      ${PROJECT_SOURCE_DIR}/src/rest_server.cpp
                      ${PROJECT_SOURCE_DIR}/src/tokenizer.cpp
-                     ${PROJECT_SOURCE_DIR}/src/qclassifier.cpp)
+                     ${PROJECT_SOURCE_DIR}/src/qclassifier.cpp
+                     ${PROJECT_SOURCE_DIR}/src/utils.cpp)
 
 add_executable(${CLASS_EXECUTABLE_API} ${CLASS_SOURCE_API})
 
