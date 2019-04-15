@@ -1,8 +1,6 @@
 // Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
 
-#include "qtokenizer.h"
-
-using namespace qnlp;
+#include "katanoisi/tokenizer.h"
 
 qtokenizer::qtokenizer(std::string& lang, bool lowercase)
 {
