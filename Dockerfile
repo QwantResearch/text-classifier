@@ -31,4 +31,4 @@ RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
 
 USER qnlp
 
-ENTRYPOINT ["/usr/local/bin/qclass_server"]
+ENTRYPOINT ["/usr/local/bin/katanoisi"]
