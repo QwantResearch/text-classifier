@@ -1,7 +1,7 @@
 // Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
 
-#ifndef __QTOKENIZER_H
-#define __QTOKENIZER_H
+#ifndef __TOKENIZER_H
+#define __TOKENIZER_H
 
 #include <iostream>
 
