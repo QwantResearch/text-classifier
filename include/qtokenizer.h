@@ -1,14 +1,13 @@
-// Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0
-// license. See LICENSE in the project root.
+// Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
 
-#ifndef __TOKENIZER_H
-#define __TOKENIZER_H
+#ifndef __QTOKENIZER_H
+#define __QTOKENIZER_H
 
 #include <iostream>
 
-#include "qnlp/en_tokenizer.h"
-#include "qnlp/fr_tokenizer.h"
 #include "qnlp/tokenizer.h"
+#include "qnlp/fr_tokenizer.h"
+#include "qnlp/en_tokenizer.h"
 
 using namespace qnlp;
 
@@ -23,7 +22,7 @@ public:
 
 private:
   std::string _lang;
-  qnlp::Tokenizer *_tokenizer;
+  qnlp::Tokenizer* _tokenizer;
 };
 
 #endif // __QTOKENIZER_H
