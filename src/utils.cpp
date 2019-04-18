@@ -3,7 +3,7 @@
 
 #include "katanoisi/utils.h"
 
-void printCookies(const Http::Request &req) {
+void printCookies(const Pistache::Http::Request &req) {
   auto cookies = req.cookies();
   const std::string indent(4, ' ');
 
@@ -48,7 +48,7 @@ const std::string currentDateTime() {
 }
 
 namespace Generic {
-void handleReady(const Rest::Request &, Http::ResponseWriter response) {
-  response.send(Http::Code::Ok, "1");
+void handleReady(const Pistache::Rest::Request &req, Pistache::Http::ResponseWriter response) {
+  response.send(Pistache::Http::Code::Ok, "1");
 }
 } // namespace Generic
