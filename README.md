@@ -2,12 +2,13 @@ Katanoisi
 =========
 
 A new C++ API for Intention classification at Qwant Research.
-The API is based on `fasttext`.
+The API is based on [`fasttext`](https://fasttext.cc/).
 
 ## Installation
 ```
 git clone --recursive https://github.com/QwantResearch/Katanoisi.git 
-docker build .
+cd Katanoisi
+docker build -t Katanoisi:latest .
 ``` 
 
 ## Launch the API
@@ -18,7 +19,7 @@ docker build .
 --port (-p)              port to use (default 9009)
 --threads (-t)           number of threads (default 1)
 --debug (-d)             debug mode (default false)
---help (-h)              Show this message
+--help (-h)              show this message
 ```
 
 ## Licencing

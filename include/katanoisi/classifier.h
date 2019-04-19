@@ -7,8 +7,6 @@
 #include <fasttext/fasttext.h>
 #include <sstream>
 
-using namespace fasttext;
-
 class classifier {
 public:
   classifier(std::string &filename, std::string &domain) : _domain(domain) {

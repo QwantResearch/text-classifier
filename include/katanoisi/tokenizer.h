@@ -10,11 +10,9 @@
 #include "qnlp/fr_tokenizer.h"
 #include "qnlp/tokenizer.h"
 
-using namespace qnlp;
-
-class qtokenizer {
+class tokenizer {
 public:
-  qtokenizer(std::string &lang, bool lowercase = true);
+  tokenizer(std::string &lang, bool lowercase = true);
 
   void set_tokenizer(std::string &lang, bool lowercase = true);
 
@@ -26,4 +24,4 @@ private:
   qnlp::Tokenizer *_tokenizer;
 };
 
-#endif // __QTOKENIZER_H
+#endif // __TOKENIZER_H

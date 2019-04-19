@@ -101,7 +101,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
     string text = j["text"];
     string lang = j["language"];
     if (text.length() > 0) {
-      qtokenizer l_tok(lang, true);
+      tokenizer l_tok(lang, true);
       j.push_back(nlohmann::json::object_t::value_type(
           string("tokenized"), l_tok.tokenize_str(text)));
       if (_debug_mode != 0)

@@ -3,29 +3,29 @@
 
 #include "katanoisi/tokenizer.h"
 
-qtokenizer::qtokenizer(std::string &lang, bool lowercase) {
+tokenizer::tokenizer(std::string &lang, bool lowercase) {
   this->set_tokenizer(lang, lowercase);
 }
 
-void qtokenizer::set_tokenizer(std::string &lang, bool lowercase) {
+void tokenizer::set_tokenizer(std::string &lang, bool lowercase) {
   _lang = lang;
 
   if (_lang == "fr") {
-    _tokenizer = new qnlp::Tokenizer_fr(qnlp::Tokenizer::PLAIN, lowercase,
+    _tokenizer = new Tokenizer_fr(qnlp::Tokenizer::PLAIN, lowercase,
                                         false, false, false);
   } else if (_lang == "en") {
-    _tokenizer = new qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN, lowercase,
+    _tokenizer = new Tokenizer_en(qnlp::Tokenizer::PLAIN, lowercase,
                                         false, false, false);
   } else {
-    _tokenizer = new qnlp::Tokenizer(qnlp::Tokenizer::PLAIN, lowercase, false,
+    _tokenizer = new Tokenizer(qnlp::Tokenizer::PLAIN, lowercase, false,
                                      false, false);
   }
 }
 
-std::vector<std::string> qtokenizer::tokenize(std::string &input) {
+std::vector<std::string> tokenizer::tokenize(std::string &input) {
   return _tokenizer->tokenize_sentence(input);
 }
 
-std::string qtokenizer::tokenize_str(std::string &input) {
+std::string tokenizer::tokenize_str(std::string &input) {
   return _tokenizer->tokenize_sentence_to_string(input);
 }
