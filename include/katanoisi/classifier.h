@@ -14,7 +14,7 @@ public:
   }
 
   std::vector<std::pair<fasttext::real, std::string>>
-  prediction(std::__cxx11::string &text, int count);
+  prediction(std::__cxx11::string &text, int count, float threshold=0.0);
   std::string getDomain() { return _domain; }
 
 private:

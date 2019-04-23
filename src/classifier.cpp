@@ -4,17 +4,16 @@
 #include "katanoisi/classifier.h"
 
 std::vector<std::pair<fasttext::real, std::string>>
-classifier::prediction(std::string &text, int count) {
+classifier::prediction(std::string &text, int count, float threshold) {
   std::vector<std::pair<fasttext::real, std::string>> results;
 
   if (*(text.end() - 1) != '\n')
     text.push_back('\n');
 
   std::stringstream istr(text);
-  _model.predictLine(istr, results, count, 0.0);
+  _model.predictLine(istr, results, count, threshold);
 
   for (auto &r : results) {
-    r.first = exp(r.first);
     // FastText returns labels like : '__label__XX'
     r.second = r.second.substr(9);
   }

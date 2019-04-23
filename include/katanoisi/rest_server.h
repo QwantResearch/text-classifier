@@ -49,7 +49,7 @@ private:
                             Http::ResponseWriter response);
 
   std::vector<std::pair<fasttext::real, std::string>>
-  askClassification(std::string &text, std::string &domain, int count);
+  askClassification(std::string &text, std::string &domain, int count, float threshold);
 
   bool process_localization(string &input, json &output);
 
