@@ -85,9 +85,13 @@ void rest_server::doClassificationPost(const Rest::Request &request,
   response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
   nlohmann::json j = nlohmann::json::parse(request.body());
   int count = 10;
+  float threshold = 0.0;
   bool debugmode = false;
   if (j.find("count") != j.end()) {
     count = j["count"];
+  }
+  if (j.find("threshold") != j.end()) {
+    threshold = j["threshold"];
   }
   if (j.find("debug") != j.end()) {
     debugmode = j["debug"];
@@ -111,7 +115,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
         string domain = j["domain"];
         string tokenized = j["tokenized"];
         std::vector<std::pair<fasttext::real, std::string>> results;
-        results = askClassification(tokenized, domain, count);
+        results = askClassification(tokenized, domain, count, threshold);
         j.push_back(
             nlohmann::json::object_t::value_type(string("intention"), results));
       } else {
@@ -141,7 +145,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
 
 std::vector<std::pair<fasttext::real, std::string>>
 rest_server::askClassification(std::string &text, std::string &domain,
-                               int count) {
+                               int count, float threshold) {
   std::vector<std::pair<fasttext::real, std::string>> to_return;
   if ((int)text.size() > 0) {
     auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(),
@@ -149,7 +153,7 @@ rest_server::askClassification(std::string &text, std::string &domain,
                                      return l_classif->getDomain() == domain;
                                    });
     if (it_classif != _list_classifs.end()) {
-      to_return = (*it_classif)->prediction(text, count);
+      to_return = (*it_classif)->prediction(text, count, threshold);
     }
   }
   return to_return;
