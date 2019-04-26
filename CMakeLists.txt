@@ -21,6 +21,6 @@ set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/katanoisi.cpp
 
 add_executable(${CLASS_EXECUTABLE_API} ${CLASS_SOURCE_API})
 
-target_link_libraries(${CLASS_EXECUTABLE_API} pistache pthread qnlp fasttext)
+target_link_libraries(${CLASS_EXECUTABLE_API} pistache pthread qnlp fasttext yaml-cpp)
 
 install(TARGETS ${CLASS_EXECUTABLE_API} DESTINATION bin)

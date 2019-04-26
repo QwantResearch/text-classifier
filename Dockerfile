@@ -12,7 +12,8 @@ RUN apt-get -y update && \
         cmake \
         g++ \
         libboost-locale-dev \
-        libboost-regex-dev
+        libboost-regex-dev \
+        libyaml-cpp-dev
 
 COPY . /opt/qnlp
 
@@ -26,6 +27,7 @@ RUN bash build-deps.sh fastText \
         && cmake .. && make -j4 && make install \
         && ldconfig
 
+# TODO: remove libyaml-cpp-dev
 
 RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
 

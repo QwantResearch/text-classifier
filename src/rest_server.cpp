@@ -12,23 +12,14 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
   model_config.open(classif_config);
   std::string line;
 
-  while (getline(model_config, line)) {
-    // @Christophe: this excludes every inline comment
-    // WIP
-    if (*line.begin() != '#') {
-      std::vector<std::string> vecline;
-      Split(line, vecline, "\t");
-      string domain = vecline[0];
-      string file = vecline[1];
-      int online = 0;
-      if ((int)vecline.size() > 2) {
-        online = atoi(vecline[2].c_str());
-      }
-      cerr << domain << "\t" << file << "\t" << online << endl;
-      _list_classifs.push_back(new classifier(file, domain));
-    }
+  YAML::Node config = YAML::LoadFile(classif_config);
+
+  for (YAML::const_iterator it=config.begin();it!=config.end();it++){
+    string domain = it->first.as<std::string>();
+    string file = it->second.as<std::string>();
+    cerr << domain << "\t" << file << "\t" << endl;
+    _list_classifs.push_back(new classifier(file, domain));
   }
-  model_config.close();
 }
 
 void rest_server::init(size_t thr) {
