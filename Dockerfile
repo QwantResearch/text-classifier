@@ -20,14 +20,17 @@ COPY . /opt/qnlp
 WORKDIR /opt/qnlp
 
 RUN bash build-deps.sh fastText \
-                        qnlp-toolkit \
-                        pistache \
-                        json \
+                       qnlp-toolkit \
+                       pistache \
+                       json \
         && mkdir -p build/ && cd build \
         && cmake .. && make -j4 && make install \
         && ldconfig
 
-# TODO: remove libyaml-cpp-dev
+RUN apt-get -y remove
+    libboost-locale-dev \
+    libboost-regex-dev \
+    libyaml-cpp-dev
 
 RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
 
