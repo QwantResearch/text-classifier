@@ -11,13 +11,13 @@ RUN apt-get -y update && \
     apt-get -y install \
         cmake \
         g++ \
-        libboost-locale \
-        libboost-regex \
-        libyaml-cpp
+        libboost-locale1.65.1 \
+        libboost-regex1.65.1 \
+        libyaml-cpp0.5v5
 
 RUN apt-get -y install \
-      libboost-locale-dev \
-      libboost-regex-dev \
+      libboost-locale1.65-dev \
+      libboost-regex1.65-dev \
       libyaml-cpp-dev
 
 COPY . /opt/qnlp
@@ -33,8 +33,8 @@ RUN bash build-deps.sh fastText \
         && ldconfig
 
 RUN apt-get -y remove \
-      libboost-locale-dev \
-      libboost-regex-dev \
+      libboost-locale1.65-dev \
+      libboost-regex1.65-dev \
       libyaml-cpp-dev
 
 RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
