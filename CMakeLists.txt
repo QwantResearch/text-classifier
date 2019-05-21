@@ -9,6 +9,11 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo)
 include_directories(${PROJECT_SOURCE_DIR}/include/ /usr/local/include/)
 link_directories(/usr/local/lib/)
 
+add_subdirectory(vendor/fastText)
+add_subdirectory(vendor/json)
+add_subdirectory(vendor/pistache)
+add_subdirectory(vendor/qnlp-toolkit)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -lpthread")
 
 set(CLASS_EXECUTABLE_API katanoisi)
@@ -21,6 +26,15 @@ set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/katanoisi.cpp
 
 add_executable(${CLASS_EXECUTABLE_API} ${CLASS_SOURCE_API})
 
-target_link_libraries(${CLASS_EXECUTABLE_API} pistache pthread qnlp fasttext yaml-cpp)
+set(LIBS
+    fasttext
+    qnlp
+    pistache
+    nlohmann_json
+    pthread
+    yaml-cpp
+)
+
+target_link_libraries(${CLASS_EXECUTABLE_API} ${LIBS})
 
 install(TARGETS ${CLASS_EXECUTABLE_API} DESTINATION bin)

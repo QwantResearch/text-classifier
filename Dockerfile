@@ -19,13 +19,17 @@ COPY . /opt/qnlp
 
 WORKDIR /opt/qnlp
 
-RUN bash build-deps.sh fastText \
-                        qnlp-toolkit \
-                        pistache \
-                        json \
-        && mkdir -p build/ && cd build \
-        && cmake .. && make -j4 && make install \
-        && ldconfig
+# RUN bash build-deps.sh fastText \
+#                         qnlp-toolkit \
+#                         pistache \
+#                         json \
+#         && mkdir -p build/ && cd build \
+#         && cmake .. && make -j4 && make install \
+#         && ldconfig
+
+RUN mkdir -p build/ && cd build \
+    && cmake .. && make -j4 && make install \
+    && ldconfig
 
 # TODO: remove libyaml-cpp-dev
 
