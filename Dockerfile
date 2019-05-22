@@ -19,6 +19,7 @@ COPY . /opt/qnlp
 
 WORKDIR /opt/qnlp
 
+
 # RUN bash build-deps.sh fastText \
 #                         qnlp-toolkit \
 #                         pistache \
@@ -28,13 +29,14 @@ WORKDIR /opt/qnlp
 #         && ldconfig
 
 RUN mkdir -p build/ && cd build \
-    && cmake .. && make -j4 && make install \
-    && ldconfig
+    && cmake .. && make -j8 
+#&& make install \
+#    && ldconfig
 
 # TODO: remove libyaml-cpp-dev
 
-RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
+#RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
 
-USER qnlp 
+#USER qnlp 
 
-ENTRYPOINT ["/usr/local/bin/katanoisi"]
+#ENTRYPOINT ["/usr/local/bin/katanoisi"]

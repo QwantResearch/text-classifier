@@ -4,7 +4,7 @@
 #ifndef __CLASSIFIER_H
 #define __CLASSIFIER_H
 
-#include <fasttext/fasttext.h>
+#include "fasttext/fasttext.h"
 #include <sstream>
 
 class classifier {
