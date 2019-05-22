@@ -20,7 +20,7 @@ execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/vendor/qnlp-toolkit/include/
 
 #add_subdirectory(vendor/fastText)
 add_subdirectory(vendor/json)
-add_subdirectory(vendor/pistache)
+add_subdirectory(vendor/pistache EXCLUDE_FROM_ALL)
 add_subdirectory(vendor/qnlp-toolkit)
 
 
