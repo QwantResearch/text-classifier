@@ -13,12 +13,8 @@ include_directories(${PROJECT_SOURCE_DIR}/vendor/qnlp-toolkit/)
 link_directories(/usr/local/lib/)
 link_directories(${PROJECT_SOURCE_DIR}/build/vendor/qnlp-toolkit/vendor/fastText/)
 
-#execute_process(COMMAND ls -alrth .)
-#execute_process(COMMAND pwd)
 execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/vendor/qnlp-toolkit/include/ ${PROJECT_SOURCE_DIR}/vendor/qnlp-toolkit/qnlp)
-#execute_process(COMMAND bash ${PROJECT_SOURCE_DIR}/build-deps.sh qnlp-toolkit pistache json)
 
-#add_subdirectory(vendor/fastText)
 add_subdirectory(vendor/json)
 add_subdirectory(vendor/pistache EXCLUDE_FROM_ALL)
 add_subdirectory(vendor/qnlp-toolkit)
