@@ -12,13 +12,34 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
   model_config.open(classif_config);
   std::string line;
 
-  YAML::Node config = YAML::LoadFile(classif_config);
+  YAML::Node config;
+  try {
+    config = YAML::LoadFile(classif_config);
+  } catch (YAML::BadFile& bf) {
+    cerr << "[ERROR] " << bf.what() << endl;
+    exit(1);
+  }
 
-  for (YAML::const_iterator it=config.begin();it!=config.end();it++){
-    string domain = it->first.as<std::string>();
-    string file = it->second.as<std::string>();
-    cerr << domain << "\t" << file << "\t" << endl;
-    _list_classifs.push_back(new classifier(file, domain));
+  for (const auto& line : config){
+    string domain = line.first.as<std::string>();
+    string file = line.second.as<std::string>();
+
+    if(domain.empty() || file.empty()) {
+      cerr << "[ERROR] Malformed config for pair ("
+        << domain << ", " << file << ")" << endl;
+      cerr << "        Skipped line..." << endl;
+      continue;
+    }
+
+    cout << domain << "\t" << file << "\t" << endl;
+
+    try {
+      classifier* classifier_pointer = new classifier(file, domain);
+      _list_classifs.push_back(classifier_pointer);
+    } catch (invalid_argument& inarg) {
+      cerr << "[ERROR] " << inarg.what() << endl;
+      continue;
+    }
   }
 }
 
