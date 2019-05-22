@@ -12,23 +12,35 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
   model_config.open(classif_config);
   std::string line;
 
-  while (getline(model_config, line)) {
-    // @Christophe: this excludes every inline comment
-    // WIP
-    if (*line.begin() != '#') {
-      std::vector<std::string> vecline;
-      Split(line, vecline, "\t");
-      string domain = vecline[0];
-      string file = vecline[1];
-      int online = 0;
-      if ((int)vecline.size() > 2) {
-        online = atoi(vecline[2].c_str());
-      }
-      cerr << domain << "\t" << file << "\t" << online << endl;
-      _list_classifs.push_back(new classifier(file, domain));
+  YAML::Node config;
+  try {
+    config = YAML::LoadFile(classif_config);
+  } catch (YAML::BadFile& bf) {
+    cerr << "[ERROR] " << bf.what() << endl;
+    exit(1);
+  }
+
+  for (const auto& line : config){
+    string domain = line.first.as<std::string>();
+    string file = line.second.as<std::string>();
+
+    if(domain.empty() || file.empty()) {
+      cerr << "[ERROR] Malformed config for pair ("
+        << domain << ", " << file << ")" << endl;
+      cerr << "        Skipped line..." << endl;
+      continue;
+    }
+
+    cout << domain << "\t" << file << "\t" << endl;
+
+    try {
+      classifier* classifier_pointer = new classifier(file, domain);
+      _list_classifs.push_back(classifier_pointer);
+    } catch (invalid_argument& inarg) {
+      cerr << "[ERROR] " << inarg.what() << endl;
+      continue;
     }
   }
-  model_config.close();
 }
 
 void rest_server::init(size_t thr) {

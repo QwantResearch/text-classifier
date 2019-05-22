@@ -14,6 +14,7 @@
 #include <pistache/router.h>
 #include <sstream>
 #include <time.h>
+#include "yaml-cpp/yaml.h"
 
 #include "katanoisi/classifier.h"
 #include "katanoisi/tokenizer.h"
