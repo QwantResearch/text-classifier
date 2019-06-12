@@ -37,7 +37,6 @@ set(LIBS
     fasttext
     qnlp
     pistache
-    nlohmann_json
     pthread
     yaml-cpp
 )

@@ -15,7 +15,7 @@ rm -rf build
 git pull  --recurse-submodules 
 bash install.sh
 popd
-exit 
+ 
 for dep in pistache json
 do
 pushd vendor/$dep
