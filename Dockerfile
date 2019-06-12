@@ -4,6 +4,8 @@ FROM ubuntu:18.04
 
 LABEL maintainer="n.martin@qwantresearch.com"
 
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
 ENV TZ=Europe/Paris
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
