@@ -10,8 +10,14 @@ git submodule update --init --recursive
 
 echo "Installing dependencies"
 
-for dep in qnlp-toolkit pistache json
-
+pushd vendor/qnlp-toolkit
+rm -rf build
+git pull  --recurse-submodules 
+bash install.sh
+popd
+exit 
+for dep in pistache json
+do
 pushd vendor/$dep
 	rm -rf build
 	mkdir -p build
@@ -20,6 +26,7 @@ pushd vendor/$dep
 		make -j 4 && make install
 	popd
 popd
+done
 
 echo "Installing text-classifier"
 mkdir -p $PREFIX

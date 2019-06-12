@@ -13,26 +13,26 @@ RUN apt-get -y update && \
         g++ \
         libboost-locale1.65.1 \
         libboost-regex1.65.1 \
-        libyaml-cpp0.5v5
+        libyaml-cpp0.5v5 \
+        libboost-locale1.65-dev \
+        libboost-regex1.65-dev \
+        libyaml-cpp-dev \
+        git \
+        cmake
 
-RUN apt-get -y install \
-      libboost-locale1.65-dev \
-      libboost-regex1.65-dev \
-      libyaml-cpp-dev
+COPY . /opt/text-classfier
 
-COPY . /opt/qnlp
+WORKDIR /opt/text-classfier
 
-WORKDIR /opt/qnlp
+RUN ./install.sh
+#RUN mkdir -p build/ && cd build \
+#    && cmake .. && make -j4 && make install \
+#    && ldconfig
 
-
-RUN mkdir -p build/ && cd build \
-    && cmake .. && make -j4 && make install \
-    && ldconfig
-
-RUN apt-get -y remove \
-      libboost-locale1.65-dev \
-      libboost-regex1.65-dev \
-      libyaml-cpp-dev
+#RUN apt-get -y remove \
+#      libboost-locale1.65-dev \
+#      libboost-regex1.65-dev \
+#      libyaml-cpp-dev
 
 RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
 

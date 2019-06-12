@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-#include "katanoisi/rest_server.h"
+#include "rest_server.h"
 
 int num_port = 9009;
 int threads = 1;

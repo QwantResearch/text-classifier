@@ -1,7 +1,7 @@
 // Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0
 // license. See LICENSE in the project root.
 
-#include "katanoisi/tokenizer.h"
+#include "tokenizer.h"
 
 tokenizer::tokenizer(std::string &lang, bool lowercase) {
   this->set_tokenizer(lang, lowercase);

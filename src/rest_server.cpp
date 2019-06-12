@@ -1,8 +1,8 @@
 // Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0
 // license. See LICENSE in the project root.
 
-#include "katanoisi/rest_server.h"
-#include "katanoisi/utils.h"
+#include "rest_server.h"
+#include "utils.h"
 
 rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
   httpEndpoint = std::make_shared<Http::Endpoint>(addr);
