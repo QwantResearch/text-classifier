@@ -25,7 +25,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -lpthread")
 
 set(CLASS_EXECUTABLE_API text-classifier)
 
-set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/katanoisi.cpp
+set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/text-classifier.cpp
                      ${PROJECT_SOURCE_DIR}/src/rest_server.cpp
                      ${PROJECT_SOURCE_DIR}/src/tokenizer.cpp
                      ${PROJECT_SOURCE_DIR}/src/classifier.cpp
