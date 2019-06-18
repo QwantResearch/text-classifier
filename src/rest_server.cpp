@@ -62,6 +62,9 @@ void rest_server::setupRoutes() {
   Routes::Post(router, "/intention/",
                Routes::bind(&rest_server::doClassificationPost, this));
 
+  Routes::Post(router, "/intention_batch/",
+              Routes::bind(&rest_server::doClassificationBatchPost, this));
+
   Routes::Get(router, "/intention/",
               Routes::bind(&rest_server::doClassificationGet, this));
 }
@@ -96,9 +99,113 @@ void rest_server::doClassificationPost(const Rest::Request &request,
       "GET, POST, DELETE, OPTIONS");
   response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
   nlohmann::json j = nlohmann::json::parse(request.body());
-  int count = 10;
-  float threshold = 0.0;
-  bool debugmode = false;
+  
+  int count;
+  float threshold;
+  bool debugmode;
+  string language, domain;
+  
+  try {
+    rest_server::fetchParamWithDefault(j, domain, language, count, threshold, debugmode);
+  } catch (std::runtime_error e) {
+    response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+    response.send(Http::Code::Bad_Request, e.what());
+  }
+
+  tokenizer l_tok(language, true);
+
+  if (j.find("text") != j.end()) {
+    string text = j["text"];
+    string tokenized = l_tok.tokenize_str(text);
+    j.push_back(nlohmann::json::object_t::value_type(
+        string("tokenized"), tokenized));
+    if (_debug_mode != 0)
+      cerr << "LOG: " << currentDateTime() << "\t"
+            << "ASK CLASS :\t" << j << endl;
+    std::vector<std::pair<fasttext::real, std::string>> results;
+    results = askClassification(tokenized, domain, count, threshold);
+    j.push_back(
+        nlohmann::json::object_t::value_type(string("intention"), results));
+    std::string s = j.dump();
+    if (_debug_mode != 0)
+      cerr << "LOG: " << currentDateTime() << "\t" << s << endl;
+    response.headers().add<Http::Header::ContentType>(
+        MIME(Application, Json));
+    response.send(Http::Code::Ok, std::string(s));
+  } else {
+    response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+    response.send(Http::Code::Bad_Request,
+                  std::string("The `text` value is required"));
+  }
+}
+
+void rest_server::doClassificationBatchPost(const Rest::Request &request,
+                                       Http::ResponseWriter response) {
+  response.headers().add<Http::Header::AccessControlAllowHeaders>(
+      "Content-Type");
+  response.headers().add<Http::Header::AccessControlAllowMethods>(
+      "GET, POST, DELETE, OPTIONS");
+  response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
+  nlohmann::json j = nlohmann::json::parse(request.body());
+
+  int count;
+  float threshold;
+  bool debugmode;
+  string language;
+  string domain;
+  
+  try {
+    rest_server::fetchParamWithDefault(j, domain, language, count, threshold, debugmode);
+  } catch (std::runtime_error e) {
+    response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+    response.send(Http::Code::Bad_Request, e.what());
+  }
+  
+  tokenizer l_tok(language, true);
+  
+  if (j.find("batch_data") != j.end()) {
+    for (auto& it: j["batch_data"]){
+      if (it.find("text") != it.end()) {
+        string text = it["text"];
+        string tokenized = l_tok.tokenize_str(text);
+        it.push_back(nlohmann::json::object_t::value_type(
+            string("tokenized"), tokenized));
+        if (_debug_mode != 0)
+          cerr << "LOG: " << currentDateTime() << "\t"
+              << "ASK CLASS :\t" << it << endl;
+        auto results = askClassification(tokenized, domain, count, threshold);
+        it.push_back(
+            nlohmann::json::object_t::value_type(string("intention"), results));
+      } else {
+        response.headers().add<Http::Header::ContentType>(
+            MIME(Application, Json));
+        response.send(Http::Code::Bad_Request,
+                      std::string("`text` value is required for each item in `batch_data` array"));
+      }
+    }
+    std::string s = j.dump();
+    if (_debug_mode != 0)
+      cerr << "LOG: " << currentDateTime() << "\t" << s << endl;
+    response.headers().add<Http::Header::ContentType>(
+        MIME(Application, Json));
+    response.send(Http::Code::Ok, std::string(s));
+  } else {
+    response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+    response.send(Http::Code::Bad_Request,
+                  std::string("`batch_data` value is required"));
+  }
+}
+
+void rest_server::fetchParamWithDefault(const nlohmann::json& j, 
+                            string& domain, 
+                            string& language,
+                            int& count,
+                            float& threshold,
+                            bool& debugmode){
+  count = 10;
+  threshold = 0.0;
+  debugmode = false;
+
   if (j.find("count") != j.end()) {
     count = j["count"];
   }
@@ -108,50 +215,15 @@ void rest_server::doClassificationPost(const Rest::Request &request,
   if (j.find("debug") != j.end()) {
     debugmode = j["debug"];
   }
-  if (j.find("language") == j.end()) {
-    response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-    response.send(Http::Code::Bad_Request,
-                  std::string("the language value is null"));
-  }
-  if (j.find("text") != j.end()) {
-    string text = j["text"];
-    string lang = j["language"];
-    if (text.length() > 0) {
-      tokenizer l_tok(lang, true);
-      j.push_back(nlohmann::json::object_t::value_type(
-          string("tokenized"), l_tok.tokenize_str(text)));
-      if (_debug_mode != 0)
-        cerr << "LOG: " << currentDateTime() << "\t"
-             << "ASK CLASS :\t" << j << endl;
-      if (j.find("domain") != j.end()) {
-        string domain = j["domain"];
-        string tokenized = j["tokenized"];
-        std::vector<std::pair<fasttext::real, std::string>> results;
-        results = askClassification(tokenized, domain, count, threshold);
-        j.push_back(
-            nlohmann::json::object_t::value_type(string("intention"), results));
-      } else {
-        response.headers().add<Http::Header::ContentType>(
-            MIME(Application, Json));
-        response.send(Http::Code::Bad_Request,
-                      std::string("Domain value is null"));
-      }
-      std::string s = j.dump();
-      if (_debug_mode != 0)
-        cerr << "LOG: " << currentDateTime() << "\t" << s << endl;
-      response.headers().add<Http::Header::ContentType>(
-          MIME(Application, Json));
-      response.send(Http::Code::Ok, std::string(s));
-    } else {
-      response.headers().add<Http::Header::ContentType>(
-          MIME(Application, Json));
-      response.send(Http::Code::Bad_Request,
-                    std::string("Length of text value is null"));
-    }
+  if (j.find("language") != j.end()) {
+    language = j["language"];
   } else {
-    response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-    response.send(Http::Code::Bad_Request,
-                  std::string("the text value is null"));
+    throw std::runtime_error("`language` value is null");
+  }
+  if (j.find("domain") != j.end()) {
+    domain = j["domain"];
+  } else {
+    throw std::runtime_error("`domain` value is null");
   }
 }
 
@@ -170,6 +242,7 @@ rest_server::askClassification(std::string &text, std::string &domain,
   }
   return to_return;
 }
+
 bool rest_server::process_localization(string &input, json &output) {
   string token(input.c_str());
   if (input.find("à ") == 0)

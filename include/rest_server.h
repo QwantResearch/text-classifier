@@ -49,6 +49,16 @@ private:
   void doClassificationPost(const Rest::Request &request,
                             Http::ResponseWriter response);
 
+  void doClassificationBatchPost(const Rest::Request &request,
+                                 Http::ResponseWriter response);
+
+  void fetchParamWithDefault(const json& j, 
+                              string& domain, 
+                              string& language,
+                              int& count,
+                              float& threshold,
+                              bool& debugmode);
+
   std::vector<std::pair<fasttext::real, std::string>>
   askClassification(std::string &text, std::string &domain, int count, float threshold);
 
