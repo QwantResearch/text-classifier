@@ -8,18 +8,8 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 include_directories(${PROJECT_SOURCE_DIR}/include/ /usr/local/include/ /usr/)
-#include_directories(${PROJECT_SOURCE_DIR}/vendor/qnlp-toolkit/vendor/fastText/)
-#include_directories(${PROJECT_SOURCE_DIR}/vendor/qnlp-toolkit/)
 
 link_directories(/usr/local/lib/ /usr/lib/)
-#link_directories(${PROJECT_SOURCE_DIR}/build/vendor/qnlp-toolkit/vendor/fastText/)
-
-#execute_process(COMMAND ln -s ${PROJECT_SOURCE_DIR}/vendor/qnlp-toolkit/include/ ${PROJECT_SOURCE_DIR}/vendor/qnlp-toolkit/qnlp)
-
-#add_subdirectory(vendor/json)
-#add_subdirectory(vendor/pistache EXCLUDE_FROM_ALL)
-#add_subdirectory(vendor/qnlp-toolkit)
-
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -lpthread")
 
