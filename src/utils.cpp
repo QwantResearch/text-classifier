@@ -1,7 +1,7 @@
 // Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0
 // license. See LICENSE in the project root.
 
-#include "katanoisi/utils.h"
+#include "utils.h"
 
 void printCookies(const Pistache::Http::Request &req) {
   auto cookies = req.cookies();

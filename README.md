@@ -1,4 +1,4 @@
-Katanoisi
+Text Classifier
 =========
 
 A new C++ API for Intention classification at Qwant Research.
@@ -6,14 +6,14 @@ The API is based on [`fasttext`](https://fasttext.cc/).
 
 ## Installation
 ```
-git clone --recursive https://github.com/QwantResearch/Katanoisi.git 
-cd Katanoisi
-docker build -t Katanoisi:latest .
+git clone --recursive https://github.com/QwantResearch/text-classifier.git 
+cd text-classifier
+docker build -t text-classifier:latest .
 ``` 
 
 ## Launch the API
 ```
-./katanoisi --model-config <filename> [--port <port>] [--threads <nthreads>] [--debug]
+./text-classifier --model-config <filename> [--port <port>] [--threads <nthreads>] [--debug]
 
 --model-config (-f)      config file in which all models are described (REQUIRED)
 --port (-p)              port to use (default 9009)
@@ -28,4 +28,5 @@ Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 licens
 
 Contact:
  - christophe[dot]servan[at]qwantresearch[dot]com
+ - e[dot]maudet[at]qwantresearch[dot]com
  - n[dot]martin[at]qwantresearch[dot]com

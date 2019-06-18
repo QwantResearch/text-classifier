@@ -16,8 +16,8 @@
 #include <time.h>
 #include "yaml-cpp/yaml.h"
 
-#include "katanoisi/classifier.h"
-#include "katanoisi/tokenizer.h"
+#include "classifier.h"
+#include "tokenizer.h"
 
 using namespace std;
 using namespace nlohmann;

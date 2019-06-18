@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-#include "katanoisi/rest_server.h"
+#include "rest_server.h"
 
 int num_port = 9009;
 int threads = 1;
@@ -13,7 +13,7 @@ int debug = 0;
 std::string model_config("");
 
 void usage() {
-  cout << "./katanoisi --model-config <filename> [--port <port>] "
+  cout << "./text-classifier --model-config <filename> [--port <port>] "
           "[--threads <nthreads>] [--debug]\n\n"
           "\t--port (-p)              port to use (default 9009)\n"
           "\t--threads (-t)           number of threads (default 1)\n"
