@@ -11,9 +11,9 @@ git submodule update --init --recursive
 echo "Installing dependencies"
 
 pushd vendor/qnlp-toolkit
-rm -rf build
-git pull  --recurse-submodules 
-bash install.sh
+	rm -rf build
+	git pull  --recurse-submodules 
+	bash install.sh $PREFIX
 popd
  
 for dep in pistache json
