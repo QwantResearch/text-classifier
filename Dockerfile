@@ -2,7 +2,7 @@
 
 FROM ubuntu:18.04
 
-LABEL maintainer="c.servan@qwantresearch.com"
+LABEL authors="Estelle Maudet, Pierre Jackman, Noël Martin, Christophe Servan"
 
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 
