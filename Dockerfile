@@ -19,9 +19,9 @@ RUN apt-get -y update && \
         git \
         cmake
 
-COPY . /opt/text-classfier
+COPY . /opt/text-classifier
 
-WORKDIR /opt/text-classfier
+WORKDIR /opt/text-classifier
 
 RUN ./install.sh
 
