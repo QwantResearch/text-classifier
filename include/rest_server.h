@@ -60,7 +60,7 @@ private:
                               bool& debugmode);
 
   std::vector<std::pair<fasttext::real, std::string>>
-  askClassification(std::string &text, std::string &domain, int count, float threshold);
+  askClassification(std::string &text, std::string &tokenized_text, std::string &domain, int count, float threshold);
 
   bool process_localization(string &input, json &output);
 

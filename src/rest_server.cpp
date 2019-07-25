@@ -22,8 +22,14 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
 
   for (const auto& line : config){
     string domain = line.first.as<std::string>();
-    string file = line.second.as<std::string>();
-
+    std::vector < std::string > l_data = line.second.as< std::vector < std::string > >();
+    if ((int)l_data.size() != 2 ) 
+    {
+        cerr << "[ERROR] while reading config file" << endl;
+        exit(1);
+    }
+    string file=l_data[0];
+    string lang = l_data[1];
     if(domain.empty() || file.empty()) {
       cerr << "[ERROR] Malformed config for pair ("
         << domain << ", " << file << ")" << endl;
@@ -34,7 +40,7 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
     cout << domain << "\t" << file << "\t" << endl;
 
     try {
-      classifier* classifier_pointer = new classifier(file, domain);
+      classifier* classifier_pointer = new classifier(file, domain, lang);
       _list_classifs.push_back(classifier_pointer);
     } catch (invalid_argument& inarg) {
       cerr << "[ERROR] " << inarg.what() << endl;
@@ -230,7 +236,7 @@ void rest_server::fetchParamWithDefault(const nlohmann::json& j,
 }
 
 std::vector<std::pair<fasttext::real, std::string>>
-rest_server::askClassification(std::string &text, std::string &domain,
+rest_server::askClassification(std::string &text, std::string &tokenized_text, std::string &domain,
                                int count, float threshold) {
   std::vector<std::pair<fasttext::real, std::string>> to_return;
   if ((int)text.size() > 0) {
@@ -239,7 +245,7 @@ rest_server::askClassification(std::string &text, std::string &domain,
                                      return l_classif->getDomain() == domain;
                                    });
     if (it_classif != _list_classifs.end()) {
-      to_return = (*it_classif)->prediction(text, count, threshold);
+      to_return = (*it_classif)->prediction(text, tokenized_text, count, threshold);
     }
   }
   return to_return;
