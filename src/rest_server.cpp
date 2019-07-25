@@ -112,18 +112,18 @@ void rest_server::doClassificationPost(const Rest::Request &request,
     response.send(Http::Code::Bad_Request, e.what());
   }
 
-  tokenizer l_tok(language, true);
+//   tokenizer l_tok(language, true);
 
   if (j.find("text") != j.end()) {
     string text = j["text"];
-    string tokenized = l_tok.tokenize_str(text);
-    j.push_back(nlohmann::json::object_t::value_type(
-        string("tokenized"), tokenized));
+    string tokenized;
     if (_debug_mode != 0)
       cerr << "LOG: " << currentDateTime() << "\t"
             << "ASK CLASS :\t" << j << endl;
     std::vector<std::pair<fasttext::real, std::string>> results;
-    results = askClassification(tokenized, domain, count, threshold);
+    results = askClassification(text, tokenized, domain, count, threshold);
+    j.push_back(nlohmann::json::object_t::value_type(
+        string("tokenized"), tokenized));
     j.push_back(
         nlohmann::json::object_t::value_type(string("intention"), results));
     std::string s = j.dump();
@@ -161,19 +161,21 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
     response.send(Http::Code::Bad_Request, e.what());
   }
   
-  tokenizer l_tok(language, true);
+//   tokenizer l_tok(language, true);
   
   if (j.find("batch_data") != j.end()) {
     for (auto& it: j["batch_data"]){
       if (it.find("text") != it.end()) {
         string text = it["text"];
-        string tokenized = l_tok.tokenize_str(text);
+        string tokenized;
         it.push_back(nlohmann::json::object_t::value_type(
             string("tokenized"), tokenized));
         if (_debug_mode != 0)
           cerr << "LOG: " << currentDateTime() << "\t"
               << "ASK CLASS :\t" << it << endl;
-        auto results = askClassification(tokenized, domain, count, threshold);
+        auto results = askClassification(text, tokenized, domain, count, threshold);
+    j.push_back(nlohmann::json::object_t::value_type(
+        string("tokenized"), tokenized));
         it.push_back(
             nlohmann::json::object_t::value_type(string("intention"), results));
       } else {
