@@ -20,6 +20,7 @@ rest_server::rest_server(std::string &config_file, int &threads, int debug) {
   }
   
   cout << "[INFO]\tDomain\t\tLocation/filename\t\tlanguage"<< endl;
+  // Reading the configuration file for filling the options.
   for (const auto& rootnode : config)
   {
       string infos = rootnode.first.as<std::string>();
@@ -35,18 +36,19 @@ rest_server::rest_server(std::string &config_file, int &threads, int debug) {
               {
                   if (modeldetails.first.as<std::string>().compare("filename")==0) filename=modeldetails.second.as<std::string>();
                   if (modeldetails.first.as<std::string>().compare("language")==0) lang=modeldetails.second.as<std::string>();
-                    
-                  
               }
               try 
               {
-                classifier* classifier_pointer = new classifier(filename, domain, lang);
-                _list_classifs.push_back(classifier_pointer);
-                cout << "[INFO]\t"<< domain << "\t" << filename << "\t" << lang << "\tloaded" << endl;
-              } catch (invalid_argument& inarg) 
+                  // Creating the set of models for the API
+                  cout << "[INFO]\t"<< domain << "\t" << filename << "\t" << lang ;
+                  classifier* classifier_pointer = new classifier(filename, domain, lang);
+                  _list_classifs.push_back(classifier_pointer);
+                  cout << "\t===> loaded" << endl;
+              } 
+              catch (invalid_argument& inarg) 
               {
-                cerr << "[ERROR]\t" << inarg.what() << endl;
-                continue;
+                  cerr << "[ERROR]\t" << inarg.what() << endl;
+                  continue;
               }
               domain="";
               filename="";
@@ -72,23 +74,12 @@ rest_server::rest_server(std::string &config_file, int &threads, int debug) {
     cout << "[INFO]\tport used:\t"<< port << endl;
     if (debug > 0) cout << "[INFO]\tDebug mode activated" << endl;
     else cout << "[INFO]\tDebug mode desactivated" << endl;
+    // Creating the entry point of the REST API.
     Pistache::Port pport(port);
-
     Address addr(Ipv4::any(), pport);
     httpEndpoint = std::make_shared<Http::Endpoint>(addr);
     _debug_mode = debug;
-    
-    
-//     cout << domain << "\t" << filename << "\t" << lang << "\t" << endl;
 
-//     try {
-//       classifier* classifier_pointer = new classifier(filename, domain, lang);
-//       _list_classifs.push_back(classifier_pointer);
-//     } catch (invalid_argument& inarg) {
-//       cerr << "[ERROR] " << inarg.what() << endl;
-//       continue;
-//     }
-//   }
 }
 
 
