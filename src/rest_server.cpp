@@ -40,6 +40,11 @@ rest_server::rest_server(std::string &config_file, int &threads, int debug) {
               try 
               {
                   // Creating the set of models for the API
+                  if ((int) filename.size() == 0)
+                  {
+                      cerr << "[ERROR]\tModel filename is not set for " << domain << endl;
+                      continue;
+                  }
                   cout << "[INFO]\t"<< domain << "\t" << filename << "\t" << lang ;
                   classifier* classifier_pointer = new classifier(filename, domain, lang);
                   _list_classifs.push_back(classifier_pointer);
@@ -74,6 +79,11 @@ rest_server::rest_server(std::string &config_file, int &threads, int debug) {
     cout << "[INFO]\tport used:\t"<< port << endl;
     if (debug > 0) cout << "[INFO]\tDebug mode activated" << endl;
     else cout << "[INFO]\tDebug mode desactivated" << endl;
+    if ((int)_list_classifs.size() == 0) 
+    {
+        cerr << "[ERROR]\tNo classification model loaded, exiting." << endl;
+        exit(1);
+    }
     // Creating the entry point of the REST API.
     Pistache::Port pport(port);
     Address addr(Ipv4::any(), pport);
@@ -172,7 +182,7 @@ void rest_server::doClassificationGet(const Rest::Request &request,
   }
   response_string.append("]}");
   if (_debug_mode != 0)
-    cerr << "[DEBUG]\t" << currentDateTime() << "\t" << response_string << endl;
+    cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << response_string << endl;
   response.send(Pistache::Http::Code::Ok, response_string);
 }
 
@@ -197,28 +207,34 @@ void rest_server::doClassificationPost(const Rest::Request &request,
     response.send(Http::Code::Bad_Request, e.what());
   }
 
-  if (j.find("text") != j.end()) {
+  if (j.find("text") != j.end()) 
+  {
     string text = j["text"];
     string tokenized;
     if (_debug_mode != 0)
-      cerr << "[DEBUG]\t" << currentDateTime() << "\t"
-            << "ASK CLASS :\t" << j << endl;
+      cerr << "[DEBUG]\t" << currentDateTime() << "\t" << "ASK CLASS :\t" << j << endl;
     std::vector<std::pair<fasttext::real, std::string>> results;
     results = askClassification(text, tokenized, domain, count, threshold);
-    j.push_back(nlohmann::json::object_t::value_type(
-        string("tokenized"), tokenized));
-    j.push_back(
-        nlohmann::json::object_t::value_type(string("intention"), results));
+    if ((int)results.size() > 0)
+    {
+        j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
+        j.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
+    }
+    else 
+    {
+        response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+        response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
+        cerr << "[ERROR]\t" << currentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
+        return;
+    }
     std::string s = j.dump();
     if (_debug_mode != 0)
-      cerr << "[DEBUG]\t" << currentDateTime() << "\t" << s << endl;
-    response.headers().add<Http::Header::ContentType>(
-        MIME(Application, Json));
+      cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << s << endl;
+    response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Ok, std::string(s));
   } else {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-    response.send(Http::Code::Bad_Request,
-                  std::string("The `text` value is required"));
+    response.send(Http::Code::Bad_Request,std::string("The `text` value is required"));
   }
 }
 
@@ -248,16 +264,24 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
       if (it.find("text") != it.end()) {
         string text = it["text"];
         string tokenized;
-        it.push_back(nlohmann::json::object_t::value_type(
-            string("tokenized"), tokenized));
+        it.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
         if (_debug_mode != 0)
           cerr << "[DEBUG]\t" << currentDateTime() << "\tASK CLASS:\t" << it << endl;
         auto results = askClassification(text, tokenized, domain, count, threshold);
-    j.push_back(nlohmann::json::object_t::value_type(
-        string("tokenized"), tokenized));
-        it.push_back(
-            nlohmann::json::object_t::value_type(string("intention"), results));
-      } else {
+        if ((int)results.size() > 0)
+        {
+            j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
+            it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
+        }
+        else 
+        {
+            response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+            response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
+        }
+        
+      } 
+      else 
+      {
         response.headers().add<Http::Header::ContentType>(
             MIME(Application, Json));
         response.send(Http::Code::Bad_Request,
@@ -306,14 +330,16 @@ std::vector<std::pair<fasttext::real, std::string>>
 rest_server::askClassification(std::string &text, std::string &tokenized_text, std::string &domain,
                                int count, float threshold) {
   std::vector<std::pair<fasttext::real, std::string>> to_return;
-  if ((int)text.size() > 0) {
-    auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(),
-                                   [&](classifier *l_classif) {
-                                     return l_classif->getDomain() == domain;
-                                   });
-    if (it_classif != _list_classifs.end()) {
-      to_return = (*it_classif)->prediction(text, tokenized_text, count, threshold);
-    }
+  if ((int)text.size() > 0) 
+  {
+      auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(), [&](classifier *l_classif)
+                                    {
+                                        return l_classif->getDomain() == domain;
+                                    });
+      if (it_classif != _list_classifs.end()) 
+      {
+          to_return = (*it_classif)->prediction(text, tokenized_text, count, threshold);
+      }
   }
   return to_return;
 }
