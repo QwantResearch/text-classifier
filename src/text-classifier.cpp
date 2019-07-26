@@ -58,17 +58,9 @@ void ProcessArgs(int argc, char **argv) {
 
 int main(int argc, char **argv) {
   ProcessArgs(argc, argv);
-//   Pistache::Port port(num_port);
-
-//   Address addr(Ipv4::any(), port);
   cout << "[INFO]\tUsing config file:\t" << API_config << endl;
   cout << "[INFO]\tCores available:\t" << hardware_concurrency() << endl;
   rest_server classification_api(API_config, threads, debug);
-
-//   rest_server classification_api(addr, API_config, debug);
-//   cout << "[INFO]\tUsing " << threads << " threads" << endl;
-//   cout << "Using port " << port << endl;
-//   cout << "Using config file " << API_config << endl;
 
   classification_api.init(threads);
   classification_api.start();
