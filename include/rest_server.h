@@ -27,6 +27,7 @@ class rest_server {
 
 public:
   rest_server(Address addr, string &classif_config, int debug_mode = 0);
+  rest_server(string &classif_config, int &threads, int debug_mode = 0);
 
   void init(size_t thr = 2);
   void start();
@@ -61,8 +62,6 @@ private:
 
   std::vector<std::pair<fasttext::real, std::string>>
   askClassification(std::string &text, std::string &tokenized_text, std::string &domain, int count, float threshold);
-
-  bool process_localization(string &input, json &output);
 
   void writeLog(string text_to_log) {}
 
