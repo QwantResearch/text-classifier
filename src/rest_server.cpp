@@ -208,7 +208,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
                 return;
             }
         }
-        j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
+        it.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
         it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));        
       } 
       else 
