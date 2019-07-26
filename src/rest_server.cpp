@@ -4,47 +4,91 @@
 #include "rest_server.h"
 #include "utils.h"
 
-rest_server::rest_server(std::string &classif_config, int &threads, int debug) {
-  std::ifstream model_config;
-  model_config.open(classif_config);
+rest_server::rest_server(std::string &config_file, int &threads, int debug) {
   std::string line;
-
+  std::string domain="";
+  std::string filename="";
+  std::string lang="xx";
+  int port=9009;
   YAML::Node config;
+
   try {
-    config = YAML::LoadFile(classif_config);
+    config = YAML::LoadFile(config_file);
   } catch (YAML::BadFile& bf) {
-    cerr << "[ERROR] " << bf.what() << endl;
+    cerr << "[ERROR]\t" << bf.what() << endl;
     exit(1);
   }
   
-  cout << "Domain\t\tLocation/filename\t\tlanguage"<< endl;
-  for (const auto& line : config){
-    string domain = line.first.as<std::string>();
-    std::vector < std::string > l_data = line.second.as< std::vector < std::string > >();
-    if ((int)l_data.size() != 2 ) 
-    {
-        cerr << "[ERROR] while reading config file" << endl;
-        exit(1);
-    }
-    string file=l_data[0];
-    string lang = l_data[1];
-    if(domain.empty() || file.empty()) {
-      cerr << "[ERROR] Malformed config for pair ("
-        << domain << ", " << file << ")" << endl;
-      cerr << "        Skipped line..." << endl;
-      continue;
-    }
-
-    cout << domain << "\t" << file << "\t" << lang << "\t" << endl;
-
-    try {
-      classifier* classifier_pointer = new classifier(file, domain, lang);
-      _list_classifs.push_back(classifier_pointer);
-    } catch (invalid_argument& inarg) {
-      cerr << "[ERROR] " << inarg.what() << endl;
-      continue;
-    }
+  cout << "[INFO]\tDomain\t\tLocation/filename\t\tlanguage"<< endl;
+  for (const auto& rootnode : config)
+  {
+      string infos = rootnode.first.as<std::string>();
+      if (infos.compare("models") == 0)
+      {
+          
+          YAML::Node modelconfig = rootnode.second;
+          for (const auto& modelnode : modelconfig)
+          {
+              domain = modelnode.first.as<std::string>();
+              YAML::Node modelinfos = modelnode.second;
+              for (const auto& modeldetails : modelinfos)
+              {
+                  if (modeldetails.first.as<std::string>().compare("filename")==0) filename=modeldetails.second.as<std::string>();
+                  if (modeldetails.first.as<std::string>().compare("language")==0) lang=modeldetails.second.as<std::string>();
+                    
+                  
+              }
+              try 
+              {
+                classifier* classifier_pointer = new classifier(filename, domain, lang);
+                _list_classifs.push_back(classifier_pointer);
+                cout << "[INFO]\t"<< domain << "\t" << filename << "\t" << lang << "\tloaded" << endl;
+              } catch (invalid_argument& inarg) 
+              {
+                cerr << "[ERROR]\t" << inarg.what() << endl;
+                continue;
+              }
+              domain="";
+              filename="";
+              lang="xx";
+          }
+      }
+      if (infos.compare("threads") == 0)
+      {
+          threads =  rootnode.second.as<int>();
+      }
+      if (infos.compare("port") == 0)
+      {
+          port =  rootnode.second.as<int>();
+      }
+      if (infos.compare("debug") == 0)
+      {
+          debug =  rootnode.second.as<int>();
+      }
   }
+      
+
+    cout << "[INFO]\tnumber of threads:\t"<< threads << endl;
+    cout << "[INFO]\tport used:\t"<< port << endl;
+    if (debug > 0) cout << "[INFO]\tDebug mode activated" << endl;
+    else cout << "[INFO]\tDebug mode desactivated" << endl;
+    Pistache::Port pport(port);
+
+    Address addr(Ipv4::any(), pport);
+    httpEndpoint = std::make_shared<Http::Endpoint>(addr);
+    _debug_mode = debug;
+    
+    
+//     cout << domain << "\t" << filename << "\t" << lang << "\t" << endl;
+
+//     try {
+//       classifier* classifier_pointer = new classifier(filename, domain, lang);
+//       _list_classifs.push_back(classifier_pointer);
+//     } catch (invalid_argument& inarg) {
+//       cerr << "[ERROR] " << inarg.what() << endl;
+//       continue;
+//     }
+//   }
 }
 
 
@@ -52,8 +96,6 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
   httpEndpoint = std::make_shared<Http::Endpoint>(addr);
   _debug_mode = debug;
 
-  std::ifstream model_config;
-  model_config.open(classif_config);
   std::string line;
 
   YAML::Node config;
@@ -139,7 +181,7 @@ void rest_server::doClassificationGet(const Rest::Request &request,
   }
   response_string.append("]}");
   if (_debug_mode != 0)
-    cerr << "LOG: " << currentDateTime() << "\t" << response_string << endl;
+    cerr << "[DEBUG]\t" << currentDateTime() << "\t" << response_string << endl;
   response.send(Pistache::Http::Code::Ok, response_string);
 }
 
@@ -155,10 +197,10 @@ void rest_server::doClassificationPost(const Rest::Request &request,
   int count;
   float threshold;
   bool debugmode;
-  string language, domain;
+  string domain;
   
   try {
-    rest_server::fetchParamWithDefault(j, domain, language, count, threshold, debugmode);
+    rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode);
   } catch (std::runtime_error e) {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Bad_Request, e.what());
@@ -168,7 +210,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
     string text = j["text"];
     string tokenized;
     if (_debug_mode != 0)
-      cerr << "LOG: " << currentDateTime() << "\t"
+      cerr << "[DEBUG]\t" << currentDateTime() << "\t"
             << "ASK CLASS :\t" << j << endl;
     std::vector<std::pair<fasttext::real, std::string>> results;
     results = askClassification(text, tokenized, domain, count, threshold);
@@ -178,7 +220,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
         nlohmann::json::object_t::value_type(string("intention"), results));
     std::string s = j.dump();
     if (_debug_mode != 0)
-      cerr << "LOG: " << currentDateTime() << "\t" << s << endl;
+      cerr << "[DEBUG]\t" << currentDateTime() << "\t" << s << endl;
     response.headers().add<Http::Header::ContentType>(
         MIME(Application, Json));
     response.send(Http::Code::Ok, std::string(s));
@@ -201,11 +243,10 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
   int count;
   float threshold;
   bool debugmode;
-  string language;
   string domain;
   
   try {
-    rest_server::fetchParamWithDefault(j, domain, language, count, threshold, debugmode);
+    rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode);
   } catch (std::runtime_error e) {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Bad_Request, e.what());
@@ -219,7 +260,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
         it.push_back(nlohmann::json::object_t::value_type(
             string("tokenized"), tokenized));
         if (_debug_mode != 0)
-          cerr << "LOG: " << currentDateTime() << "\tASK CLASS:\t" << it << endl;
+          cerr << "[DEBUG]\t" << currentDateTime() << "\tASK CLASS:\t" << it << endl;
         auto results = askClassification(text, tokenized, domain, count, threshold);
     j.push_back(nlohmann::json::object_t::value_type(
         string("tokenized"), tokenized));
@@ -234,7 +275,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
     }
     std::string s = j.dump();
     if (_debug_mode != 0)
-      cerr << "LOG: " << currentDateTime() << "\tRESULT CLASS:\t" << s << endl;
+      cerr << "[DEBUG]\t" << currentDateTime() << "\tRESULT CLASS:\t" << s << endl;
     response.headers().add<Http::Header::ContentType>(
         MIME(Application, Json));
     response.send(Http::Code::Ok, std::string(s));
@@ -247,7 +288,6 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
 
 void rest_server::fetchParamWithDefault(const nlohmann::json& j, 
                             string& domain, 
-                            string& language,
                             int& count,
                             float& threshold,
                             bool& debugmode){
@@ -263,11 +303,6 @@ void rest_server::fetchParamWithDefault(const nlohmann::json& j,
   }
   if (j.find("debug") != j.end()) {
     debugmode = j["debug"];
-  }
-  if (j.find("language") != j.end()) {
-    language = j["language"];
-  } else {
-    throw std::runtime_error("`language` value is null");
   }
   if (j.find("domain") != j.end()) {
     domain = j["domain"];

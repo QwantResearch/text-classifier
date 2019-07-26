@@ -28,10 +28,11 @@ class rest_server {
 public:
   rest_server(Address addr, string &classif_config, int debug_mode = 0);
   rest_server(string &classif_config, int &threads, int debug_mode = 0);
+  ~rest_server(){httpEndpoint->shutdown();};
 
   void init(size_t thr = 2);
   void start();
-  void shutdown() { httpEndpoint->shutdown(); }
+  void shutdown() { httpEndpoint->shutdown();}
 
 private:
   int _debug_mode;
@@ -55,7 +56,6 @@ private:
 
   void fetchParamWithDefault(const json& j, 
                               string& domain, 
-                              string& language,
                               int& count,
                               float& threshold,
                               bool& debugmode);
