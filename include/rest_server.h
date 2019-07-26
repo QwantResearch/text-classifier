@@ -26,7 +26,6 @@ using namespace Pistache;
 class rest_server {
 
 public:
-  rest_server(Address addr, string &classif_config, int debug_mode = 0);
   rest_server(string &classif_config, int &threads, int debug_mode = 0);
   ~rest_server(){httpEndpoint->shutdown();};
 

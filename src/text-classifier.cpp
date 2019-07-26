@@ -14,10 +14,7 @@ std::string API_config("");
 
 void usage() {
   cout << "./text-classifier --config <filename> [--debug]\n\n"
-//           "\t--port (-p)              port to use (default 9009)\n"
-//           "\t--threads (-t)           number of threads (default 1)\n"
           "\t--config (-c)            config file in which all models and API configuration are set (needed)\n"
-//           "described (needed)\n"
           "\t--debug (-d)             debug mode (default false)\n"
           "\t--help (-h)              Show this message\n"
        << endl;

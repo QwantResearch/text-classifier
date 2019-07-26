@@ -4,76 +4,52 @@
 #include "rest_server.h"
 #include "utils.h"
 
-rest_server::rest_server(std::string &config_file, int &threads, int debug) {
-  std::string line;
-  std::string domain="";
-  std::string filename="";
-  std::string lang="xx";
-  int port=9009;
-  YAML::Node config;
+rest_server::rest_server(std::string &config_file, int &threads, int debug) 
+{
+    std::string line;
+    int port=9009;
+    YAML::Node config;
 
-  try {
-    config = YAML::LoadFile(config_file);
-  } catch (YAML::BadFile& bf) {
-    cerr << "[ERROR]\t" << bf.what() << endl;
-    exit(1);
-  }
+    try 
+    {
+    // Reading the configuration file for filling the options.
+        config = YAML::LoadFile(config_file);
+        cout << "[INFO]\tDomain\t\tLocation/filename\t\tlanguage"<< endl;
+        threads = config["threads"].as<int>() ;
+        port =  config["port"].as<int>() ;
+        debug =  config["debug"].as<int>() ;
+        YAML::Node modelconfig = config["models"]; 
+        for (const auto& modelnode : modelconfig)
+        {
+            std::string domain=modelnode.first.as<std::string>();
+            YAML::Node modelinfos = modelnode.second;
+            std::string filename=modelinfos["filename"].as<std::string>();
+            std::string lang=modelinfos["language"].as<std::string>();
+            try 
+            {
+                // Creating the set of models for the API
+                if ((int) filename.size() == 0)
+                {
+                    cerr << "[ERROR]\tModel filename is not set for " << domain << endl;
+                    continue;
+                }
+                cout << "[INFO]\t"<< domain << "\t" << filename << "\t" << lang ;
+                classifier* classifier_pointer = new classifier(filename, domain, lang);
+                _list_classifs.push_back(classifier_pointer);
+                cout << "\t===> loaded" << endl;
+            } 
+            catch (invalid_argument& inarg) 
+            {
+                cerr << "[ERROR]\t" << inarg.what() << endl;
+                continue;
+            }
+        }
+    } catch (YAML::BadFile& bf) {
+      cerr << "[ERROR]\t" << bf.what() << endl;
+      exit(1);
+    }
   
-  cout << "[INFO]\tDomain\t\tLocation/filename\t\tlanguage"<< endl;
-  // Reading the configuration file for filling the options.
-  for (const auto& rootnode : config)
-  {
-      string infos = rootnode.first.as<std::string>();
-      if (infos.compare("models") == 0)
-      {
-          
-          YAML::Node modelconfig = rootnode.second;
-          for (const auto& modelnode : modelconfig)
-          {
-              domain = modelnode.first.as<std::string>();
-              YAML::Node modelinfos = modelnode.second;
-              for (const auto& modeldetails : modelinfos)
-              {
-                  if (modeldetails.first.as<std::string>().compare("filename")==0) filename=modeldetails.second.as<std::string>();
-                  if (modeldetails.first.as<std::string>().compare("language")==0) lang=modeldetails.second.as<std::string>();
-              }
-              try 
-              {
-                  // Creating the set of models for the API
-                  if ((int) filename.size() == 0)
-                  {
-                      cerr << "[ERROR]\tModel filename is not set for " << domain << endl;
-                      continue;
-                  }
-                  cout << "[INFO]\t"<< domain << "\t" << filename << "\t" << lang ;
-                  classifier* classifier_pointer = new classifier(filename, domain, lang);
-                  _list_classifs.push_back(classifier_pointer);
-                  cout << "\t===> loaded" << endl;
-              } 
-              catch (invalid_argument& inarg) 
-              {
-                  cerr << "[ERROR]\t" << inarg.what() << endl;
-                  continue;
-              }
-              domain="";
-              filename="";
-              lang="xx";
-          }
-      }
-      if (infos.compare("threads") == 0)
-      {
-          threads =  rootnode.second.as<int>();
-      }
-      if (infos.compare("port") == 0)
-      {
-          port =  rootnode.second.as<int>();
-      }
-      if (infos.compare("debug") == 0)
-      {
-          debug =  rootnode.second.as<int>();
-      }
-  }
-      
+     
 
     cout << "[INFO]\tnumber of threads:\t"<< threads << endl;
     cout << "[INFO]\tport used:\t"<< port << endl;
@@ -90,51 +66,6 @@ rest_server::rest_server(std::string &config_file, int &threads, int debug) {
     httpEndpoint = std::make_shared<Http::Endpoint>(addr);
     _debug_mode = debug;
 
-}
-
-
-rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
-  httpEndpoint = std::make_shared<Http::Endpoint>(addr);
-  _debug_mode = debug;
-
-  std::string line;
-
-  YAML::Node config;
-  try {
-    config = YAML::LoadFile(classif_config);
-  } catch (YAML::BadFile& bf) {
-    cerr << "[ERROR] " << bf.what() << endl;
-    exit(1);
-  }
-
-  cout << "Domain\t\tLocation/filename\t\tlanguage"<< endl;
-  for (const auto& line : config){
-    string domain = line.first.as<std::string>();
-    std::vector < std::string > l_data = line.second.as< std::vector < std::string > >();
-    if ((int)l_data.size() != 2 ) 
-    {
-        cerr << "[ERROR] while reading config file" << endl;
-        exit(1);
-    }
-    string file=l_data[0];
-    string lang = l_data[1];
-    if(domain.empty() || file.empty()) {
-      cerr << "[ERROR] Malformed config for pair ("
-        << domain << ", " << file << ")" << endl;
-      cerr << "        Skipped line..." << endl;
-      continue;
-    }
-
-    cout << domain << "\t" << file << "\t" << lang << "\t" << endl;
-
-    try {
-      classifier* classifier_pointer = new classifier(file, domain, lang);
-      _list_classifs.push_back(classifier_pointer);
-    } catch (invalid_argument& inarg) {
-      cerr << "[ERROR] " << inarg.what() << endl;
-      continue;
-    }
-  }
 }
 
 
@@ -217,16 +148,16 @@ void rest_server::doClassificationPost(const Rest::Request &request,
     results = askClassification(text, tokenized, domain, count, threshold);
     if ((int)results.size() > 0)
     {
-        j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
-        j.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
+        if ((int)results[0].second.compare("DOMAIN ERROR")==0)
+        {
+            response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+            response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
+            cerr << "[ERROR]\t" << currentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
+            return;
+        }
     }
-    else 
-    {
-        response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-        response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
-        cerr << "[ERROR]\t" << currentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
-        return;
-    }
+    j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
+    j.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
     std::string s = j.dump();
     if (_debug_mode != 0)
       cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << s << endl;
@@ -270,15 +201,16 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
         auto results = askClassification(text, tokenized, domain, count, threshold);
         if ((int)results.size() > 0)
         {
-            j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
-            it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
+            if ((int)results[0].second.compare("DOMAIN ERROR")==0)
+            {
+                response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+                response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
+                cerr << "[ERROR]\t" << currentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
+                return;
+            }
         }
-        else 
-        {
-            response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-            response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
-        }
-        
+        j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
+        it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));        
       } 
       else 
       {
@@ -339,6 +271,10 @@ rest_server::askClassification(std::string &text, std::string &tokenized_text, s
       if (it_classif != _list_classifs.end()) 
       {
           to_return = (*it_classif)->prediction(text, tokenized_text, count, threshold);
+      }
+      else
+      {
+          to_return.push_back(std::pair<fasttext::real, std::string>(0.0,"DOMAIN ERROR"));
       }
   }
   return to_return;
