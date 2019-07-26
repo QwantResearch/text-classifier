@@ -20,6 +20,7 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
     exit(1);
   }
 
+  cout << "Domain\t\tLocation/filename\t\tlanguage"<< endl;
   for (const auto& line : config){
     string domain = line.first.as<std::string>();
     std::vector < std::string > l_data = line.second.as< std::vector < std::string > >();
@@ -37,7 +38,7 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
       continue;
     }
 
-    cout << domain << "\t" << file << "\t" << endl;
+    cout << domain << "\t" << file << "\t" << lang << "\t" << endl;
 
     try {
       classifier* classifier_pointer = new classifier(file, domain, lang);
