@@ -1,6 +1,0 @@
-# name of the model:
-#  - file localization
-#  - language
-language_identification: 
-  - resources/lid.176.ftz
-  - xx
