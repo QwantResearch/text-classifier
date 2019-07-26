@@ -4,6 +4,50 @@
 #include "rest_server.h"
 #include "utils.h"
 
+rest_server::rest_server(std::string &classif_config, int &threads, int debug) {
+  std::ifstream model_config;
+  model_config.open(classif_config);
+  std::string line;
+
+  YAML::Node config;
+  try {
+    config = YAML::LoadFile(classif_config);
+  } catch (YAML::BadFile& bf) {
+    cerr << "[ERROR] " << bf.what() << endl;
+    exit(1);
+  }
+  
+  cout << "Domain\t\tLocation/filename\t\tlanguage"<< endl;
+  for (const auto& line : config){
+    string domain = line.first.as<std::string>();
+    std::vector < std::string > l_data = line.second.as< std::vector < std::string > >();
+    if ((int)l_data.size() != 2 ) 
+    {
+        cerr << "[ERROR] while reading config file" << endl;
+        exit(1);
+    }
+    string file=l_data[0];
+    string lang = l_data[1];
+    if(domain.empty() || file.empty()) {
+      cerr << "[ERROR] Malformed config for pair ("
+        << domain << ", " << file << ")" << endl;
+      cerr << "        Skipped line..." << endl;
+      continue;
+    }
+
+    cout << domain << "\t" << file << "\t" << lang << "\t" << endl;
+
+    try {
+      classifier* classifier_pointer = new classifier(file, domain, lang);
+      _list_classifs.push_back(classifier_pointer);
+    } catch (invalid_argument& inarg) {
+      cerr << "[ERROR] " << inarg.what() << endl;
+      continue;
+    }
+  }
+}
+
+
 rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
   httpEndpoint = std::make_shared<Http::Endpoint>(addr);
   _debug_mode = debug;
@@ -49,6 +93,7 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
     }
   }
 }
+
 
 void rest_server::init(size_t thr) {
   auto opts = Http::Endpoint::options().threads(thr).flags(
@@ -119,8 +164,6 @@ void rest_server::doClassificationPost(const Rest::Request &request,
     response.send(Http::Code::Bad_Request, e.what());
   }
 
-//   tokenizer l_tok(language, true);
-
   if (j.find("text") != j.end()) {
     string text = j["text"];
     string tokenized;
@@ -167,8 +210,6 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Bad_Request, e.what());
   }
-  
-//   tokenizer l_tok(language, true);
   
   if (j.find("batch_data") != j.end()) {
     for (auto& it: j["batch_data"]){
@@ -249,20 +290,6 @@ rest_server::askClassification(std::string &text, std::string &tokenized_text, s
     }
   }
   return to_return;
-}
-
-bool rest_server::process_localization(string &input, json &output) {
-  string token(input.c_str());
-  if (input.find("à ") == 0)
-    token = input.substr(3);
-  if (input.find("au dessus de ") == 0)
-    token = input.substr(13);
-  if (input.find("au ") == 0)
-    token = input.substr(4);
-  if (input.find("vers ") == 0)
-    token = input.substr(5);
-  output.push_back(
-      nlohmann::json::object_t::value_type(string("label"), token));
 }
 
 void rest_server::doAuth(const Rest::Request &request,
