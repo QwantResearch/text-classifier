@@ -178,8 +178,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
         it.push_back(nlohmann::json::object_t::value_type(
             string("tokenized"), tokenized));
         if (_debug_mode != 0)
-          cerr << "LOG: " << currentDateTime() << "\t"
-              << "ASK CLASS :\t" << it << endl;
+          cerr << "LOG: " << currentDateTime() << "\tASK CLASS:\t" << it << endl;
         auto results = askClassification(text, tokenized, domain, count, threshold);
     j.push_back(nlohmann::json::object_t::value_type(
         string("tokenized"), tokenized));
@@ -194,7 +193,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
     }
     std::string s = j.dump();
     if (_debug_mode != 0)
-      cerr << "LOG: " << currentDateTime() << "\t" << s << endl;
+      cerr << "LOG: " << currentDateTime() << "\tRESULT CLASS:\t" << s << endl;
     response.headers().add<Http::Header::ContentType>(
         MIME(Application, Json));
     response.send(Http::Code::Ok, std::string(s));
