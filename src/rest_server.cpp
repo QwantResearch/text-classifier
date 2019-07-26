@@ -195,7 +195,6 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
       if (it.find("text") != it.end()) {
         string text = it["text"];
         string tokenized;
-        it.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
         if (_debug_mode != 0)
           cerr << "[DEBUG]\t" << currentDateTime() << "\tASK CLASS:\t" << it << endl;
         auto results = askClassification(text, tokenized, domain, count, threshold);
