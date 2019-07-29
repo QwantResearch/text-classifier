@@ -26,14 +26,16 @@ using namespace Pistache;
 class rest_server {
 
 public:
-  rest_server(Address addr, string &classif_config, int debug_mode = 0);
+  rest_server(string &classif_config, int &threads, int debug_mode = 0);
+  ~rest_server(){httpEndpoint->shutdown();};
 
-  void init(size_t thr = 2);
+  void init();
   void start();
-  void shutdown() { httpEndpoint->shutdown(); }
+  void shutdown() { httpEndpoint->shutdown();}
 
 private:
   int _debug_mode;
+  int _nbr_threads;
   std::vector<classifier *> _list_classifs;
   std::shared_ptr<Http::Endpoint> httpEndpoint;
   Rest::Router router;
@@ -54,15 +56,12 @@ private:
 
   void fetchParamWithDefault(const json& j, 
                               string& domain, 
-                              string& language,
                               int& count,
                               float& threshold,
                               bool& debugmode);
 
   std::vector<std::pair<fasttext::real, std::string>>
-  askClassification(std::string &text, std::string &domain, int count, float threshold);
-
-  bool process_localization(string &input, json &output);
+  askClassification(std::string &text, std::string &tokenized_text, std::string &domain, int count, float threshold);
 
   void writeLog(string text_to_log) {}
 

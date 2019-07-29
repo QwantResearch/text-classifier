@@ -4,19 +4,18 @@
 #include "classifier.h"
 
 std::vector<std::pair<fasttext::real, std::string>>
-classifier::prediction(std::string &text, int count, float threshold) {
+classifier::prediction(std::string &text, std::string &tokenized, int count, float threshold) {
   std::vector<std::pair<fasttext::real, std::string>> results;
-
   if (*(text.end() - 1) != '\n')
     text.push_back('\n');
+  tokenized=_tokenizer->tokenize_str(text);
 
-  std::stringstream istr(text);
+  std::stringstream istr(tokenized);
   _model.predictLine(istr, results, count, threshold);
 
   for (auto &r : results) {
     // FastText returns labels like : '__label__XX'
     r.second = r.second.substr(9);
   }
-
   return results;
 }

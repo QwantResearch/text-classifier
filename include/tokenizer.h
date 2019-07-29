@@ -13,7 +13,7 @@
 class tokenizer {
 public:
   tokenizer(std::string &lang, bool lowercase = true);
-
+  ~tokenizer(){delete(_tokenizer);};
   void set_tokenizer(std::string &lang, bool lowercase = true);
 
   std::vector<std::string> tokenize(std::string &input);
