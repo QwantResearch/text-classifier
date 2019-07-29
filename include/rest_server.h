@@ -29,12 +29,13 @@ public:
   rest_server(string &classif_config, int &threads, int debug_mode = 0);
   ~rest_server(){httpEndpoint->shutdown();};
 
-  void init(size_t thr = 2);
+  void init();
   void start();
   void shutdown() { httpEndpoint->shutdown();}
 
 private:
   int _debug_mode;
+  int _nbr_threads;
   std::vector<classifier *> _list_classifs;
   std::shared_ptr<Http::Endpoint> httpEndpoint;
   Rest::Router router;

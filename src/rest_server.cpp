@@ -48,10 +48,8 @@ rest_server::rest_server(std::string &config_file, int &threads, int debug)
       cerr << "[ERROR]\t" << bf.what() << endl;
       exit(1);
     }
-  
-     
-
-    cout << "[INFO]\tnumber of threads:\t"<< threads << endl;
+    _nbr_threads=threads;
+    cout << "[INFO]\tnumber of threads:\t"<< _nbr_threads << endl;
     cout << "[INFO]\tport used:\t"<< port << endl;
     if (debug > 0) cout << "[INFO]\tDebug mode activated" << endl;
     else cout << "[INFO]\tDebug mode desactivated" << endl;
@@ -69,8 +67,8 @@ rest_server::rest_server(std::string &config_file, int &threads, int debug)
 }
 
 
-void rest_server::init(size_t thr) {
-  auto opts = Http::Endpoint::options().threads(thr).flags(
+void rest_server::init() {
+  auto opts = Http::Endpoint::options().threads(_nbr_threads).flags(
       Tcp::Options::InstallSignalHandler);
   httpEndpoint->init(opts);
   setupRoutes();
