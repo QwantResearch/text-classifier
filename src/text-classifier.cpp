@@ -7,8 +7,9 @@
 
 #include "rest_server.h"
 
-// int num_port = 9009;
+// default number of threads
 int threads = 1;
+// debug mode set to zero by default
 int debug = 0;
 std::string API_config("");
 
@@ -22,10 +23,13 @@ void usage() {
 }
 
 void ProcessArgs(int argc, char **argv) {
-  const char *const short_opts = "c:dh";
+  const char *const short_opts = "t:c:dh";
   const option long_opts[] = {
-      {"config", 1, nullptr, 'f'}, {"debug", 0, nullptr, 'd'},
-      {"help", 0, nullptr, 'h'},         {nullptr, 0, nullptr, 0}};
+      {"threads", 0, nullptr, 't'}, 
+      {"config", 1, nullptr, 'f'}, 
+      {"debug", 0, nullptr, 'd'},
+      {"help", 0, nullptr, 'h'},
+      {nullptr, 0, nullptr, 0}};
 
   while (true) {
     const auto opt = getopt_long(argc, argv, short_opts, long_opts, nullptr);
@@ -40,6 +44,10 @@ void ProcessArgs(int argc, char **argv) {
 
     case 'c':
       API_config = optarg;
+      break;
+
+    case 't':
+      threads = atoi(optarg);
       break;
 
     case 'h': // -h or --help
@@ -60,9 +68,10 @@ int main(int argc, char **argv) {
   ProcessArgs(argc, argv);
   cout << "[INFO]\tUsing config file:\t" << API_config << endl;
   cout << "[INFO]\tCores available:\t" << hardware_concurrency() << endl;
+  // creating the rest server, the options in the config file overite the ones given in the arguments.
   rest_server classification_api(API_config, threads, debug);
 
-  classification_api.init(threads);
+  classification_api.init();
   classification_api.start();
   classification_api.shutdown();
 }
