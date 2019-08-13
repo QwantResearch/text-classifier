@@ -17,7 +17,16 @@ RUN apt-get -y update && \
         libboost-regex1.65-dev \
         libyaml-cpp-dev \
         git \
-        cmake
+        cmake \
+        build-essential \
+        autoconf \
+        libtool \
+        pkg-config\
+        clang \
+        libc++-dev \
+        golang \
+        libssl-dev
+
 
 COPY . /opt/text-classfier
 

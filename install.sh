@@ -19,6 +19,7 @@ popd
 for dep in pistache json
 do
 pushd vendor/$dep
+	#git submodule update --init
 	rm -rf build
 	mkdir -p build
 	pushd build
@@ -27,6 +28,19 @@ pushd vendor/$dep
 	popd
 popd
 done
+
+pushd vendor/grpc
+	git submodule update --init
+	rm -rf build
+	mkdir -p build
+	pushd build
+		cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_PROTOBUF_PROVIDER=package -DgRPC_ZLIB_PROVIDER=package -DgRPC_CARES_PROVIDER=package -DCMAKE_BUILD_TYPE=Release --DCMAKE_INSTALL_PREFIX="/usr/local/" ..
+		# See https://github.com/grpc/grpc/issues/13841
+		# Appears to be a problem with multi-threading, if make -j 4 doesn't work, use make -j 1
+		make -j 1 && make install
+	popd
+	make && make install
+popd
 
 echo "Installing text-classifier"
 mkdir -p $PREFIX
