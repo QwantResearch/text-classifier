@@ -25,8 +25,13 @@ RUN apt-get -y update && \
         clang \
         libc++-dev \
         golang \
-        libssl-dev
+        libssl-dev \
+        libgflags-dev \
+        libgtest-dev
 
+# To Keep or not libprotobuf9v5 ??? https://github.com/grpc/grpc/issues/18973
+# Change by libprotobuf10 ?
+# what about libprotoc9v5 libprotoc9v5
 
 COPY . /opt/text-classfier
 
