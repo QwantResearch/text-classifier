@@ -35,6 +35,44 @@ void Split(const std::string &line, std::vector<std::string> &pieces,
     pieces.push_back(token);
 }
 
+void ProcessCongifFile(std::string &classif_config, std::vector<classifier *> &_list_classifs){
+
+  std::ifstream model_config;
+  model_config.open(classif_config);
+  std::string line;
+
+  YAML::Node config;
+  try {
+    config = YAML::LoadFile(classif_config);
+  } catch (YAML::BadFile& bf) {
+    std::cerr << "[ERROR] " << bf.what() << std::endl;
+    exit(1);
+  }
+
+  for (const auto& line : config){
+    std::string domain = line.first.as<std::string>();
+    std::string file = line.second.as<std::string>();
+
+    if(domain.empty() || file.empty()) {
+      std::cerr << "[ERROR] Malformed config for pair ("
+        << domain << ", " << file << ")" << std::endl;
+      std::cerr << "        Skipped line..." << std::endl;
+      continue;
+    }
+
+    std::cout << domain << "\t" << file << "\t" << std::endl;
+
+    try {
+      classifier* classifier_pointer = new classifier(file, domain);
+      _list_classifs.push_back(classifier_pointer);
+    } catch (std::invalid_argument& inarg) {
+      std::cerr << "[ERROR] " << inarg.what() << std::endl;
+      continue;
+    }
+  }
+
+}
+
 const std::string currentDateTime() {
   time_t now = time(0);
   struct tm tstruct;

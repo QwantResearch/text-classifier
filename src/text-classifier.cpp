@@ -79,22 +79,24 @@ void ProcessArgs(int argc, char **argv) {
 
 int main(int argc, char **argv) {
   ProcessArgs(argc, argv);
-  Pistache::Port port(num_port);
-
-  Address addr(Ipv4::any(), port);
 
   cout << "Cores = " << hardware_concurrency() << endl;
   cout << "Using " << threads << " threads" << endl;
-  cout << "Using port " << port << endl;
+  cout << "Using port " << num_port << endl;
   cout << "Using config file " << model_config << endl;
 
   if (server_type == 0) {
+    Pistache::Port port(num_port);
+    Address addr(Ipv4::any(), port);
+
     rest_server classification_api(addr, model_config, debug);
 
     classification_api.init(threads);
     classification_api.start();
     classification_api.shutdown();
   } else {
-    RunGRPCServer();
+    grpc_server classification_api(num_port, model_config, debug);
+
+    classification_api.init(threads); //TODO: Use threads number
   }
 }

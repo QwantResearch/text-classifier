@@ -8,39 +8,7 @@ rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
   httpEndpoint = std::make_shared<Http::Endpoint>(addr);
   _debug_mode = debug;
 
-  std::ifstream model_config;
-  model_config.open(classif_config);
-  std::string line;
-
-  YAML::Node config;
-  try {
-    config = YAML::LoadFile(classif_config);
-  } catch (YAML::BadFile& bf) {
-    cerr << "[ERROR] " << bf.what() << endl;
-    exit(1);
-  }
-
-  for (const auto& line : config){
-    string domain = line.first.as<std::string>();
-    string file = line.second.as<std::string>();
-
-    if(domain.empty() || file.empty()) {
-      cerr << "[ERROR] Malformed config for pair ("
-        << domain << ", " << file << ")" << endl;
-      cerr << "        Skipped line..." << endl;
-      continue;
-    }
-
-    cout << domain << "\t" << file << "\t" << endl;
-
-    try {
-      classifier* classifier_pointer = new classifier(file, domain);
-      _list_classifs.push_back(classifier_pointer);
-    } catch (invalid_argument& inarg) {
-      cerr << "[ERROR] " << inarg.what() << endl;
-      continue;
-    }
-  }
+  ProcessCongifFile(classif_config, _list_classifs);
 }
 
 void rest_server::init(size_t thr) {

@@ -6,16 +6,23 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include <pistache/client.h>
 #include <pistache/endpoint.h>
 #include <pistache/http.h>
 #include <pistache/router.h>
+#include "yaml-cpp/yaml.h"
+
+#include "classifier.h"
+
 
 void Split(const std::string &line, std::vector<std::string> &pieces,
            const std::string del);
 
 void printCookies(const Pistache::Http::Request &req);
+
+void ProcessCongifFile(std::string &classif_config, std::vector<classifier *> &_list_classifs);
 
 const std::string currentDateTime();
 

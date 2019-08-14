@@ -18,6 +18,7 @@ message TextToClassify {
   string language = 2;
   int32 count = 3;
   float threshold = 4;
+  string domain = 5;
 }
 
 message TextClassified {
@@ -25,7 +26,8 @@ message TextClassified {
   string language = 2;
   int32 count = 3;
   float threshold = 4;
-  repeated Score intention = 5;
+  string domain = 5;
+  repeated Score intention = 6;
 }
 
 message Score{

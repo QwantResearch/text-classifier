@@ -19,13 +19,14 @@
 
 #include "classifier.h"
 #include "tokenizer.h"
+#include "utils.h"
 
 using namespace std;
 using namespace nlohmann;
 
 class RouteClassifyImpl final : public RouteClassify::Service {
 public:
-  RouteClassifyImpl();
+  RouteClassifyImpl(string &classif_config);
 
   grpc::Status GetDomains(grpc::ServerContext* context,
                           const Empty* request,
@@ -35,12 +36,18 @@ public:
                           TextClassified* response) override;
   grpc::Status RouteClassify(grpc::ServerContext* context,
                              grpc::ServerReaderWriter< TextClassified, TextToClassify>* stream) override;
+
+private:
+  std::vector<classifier *> _list_classifs;
+
+  std::vector<std::pair<fasttext::real, std::string>>
+  askClassification(std::string &text, std::string &domain, int count, float threshold);
 };
 
 class grpc_server {
 
 public:
-  grpc_server(grpc::Channel addr, string &classif_config, int debug_mode = 0);
+  grpc_server(int num_port, string &classif_config, int debug_mode = 0);
 
   void init(size_t thr = 2);
   void start();
@@ -48,9 +55,9 @@ public:
 
 private:
   int _debug_mode;
-  std::vector<classifier *> _list_classifs;
-  std::vector<std::pair<fasttext::real, std::string>>
-  askClassification(std::string &text, std::string &domain, int count, float threshold);
+  std::string _server_address;
+  string _classif_config;
+
 
   void writeLog(string text_to_log) { }
 };
