@@ -1,21 +1,34 @@
 syntax = "proto3";
 
-option java_package = "ex.grpc";
-
-package grpc_classification;
-
-// The greeting service definition.
-service Greeter {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
+service RouteClassify {
+    rpc GetDomains(Empty) returns (Domains) {}
+    rpc GetClassif(TextToClassify) returns (TextClassified) {}
+    rpc RouteClassify(stream TextToClassify) returns (stream TextClassified) {}
 }
 
-// The request message containing the user's name.
-message HelloRequest {
-  string name = 1;
+message Empty {
 }
 
-// The response message containing the greetings
-message HelloReply {
-  string message = 1;
+message Domains {
+    repeated string domains = 1;
+}
+
+message TextToClassify {
+  string text = 1;
+  string language = 2;
+  int32 count = 3;
+  float threshold = 4;
+}
+
+message TextClassified {
+  string text = 1;
+  string language = 2;
+  int32 count = 3;
+  float threshold = 4;
+  repeated Score intention = 5;
+}
+
+message Score{
+    string label = 1;
+    float confidence = 2;
 }

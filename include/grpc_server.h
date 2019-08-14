@@ -23,38 +23,38 @@
 using namespace std;
 using namespace nlohmann;
 
-// class RouteClassifyImpl final : public RouteClassify::Service {
-// public:
-//   RouteClassifyImpl(const std::string& db);
+class RouteClassifyImpl final : public RouteClassify::Service {
+public:
+  RouteClassifyImpl();
 
-//   grpc::Status GetDomains(grpc::ServerContext* context,
-//                           const Empty* request,
-//                           Domains* response) override;
-//   grpc::Status GetClassif(grpc::ServerContext* context,
-//                           const TextToClassify* request,
-//                           TextClassified* response) override;
-//   grpc::Status RouteClassify(grpc::ServerContext* context,
-//                              grpc::ServerReaderWriter< TextClassified, TextToClassify>* stream) override;
-// };
+  grpc::Status GetDomains(grpc::ServerContext* context,
+                          const Empty* request,
+                          Domains* response) override;
+  grpc::Status GetClassif(grpc::ServerContext* context,
+                          const TextToClassify* request,
+                          TextClassified* response) override;
+  grpc::Status RouteClassify(grpc::ServerContext* context,
+                             grpc::ServerReaderWriter< TextClassified, TextToClassify>* stream) override;
+};
 
-// class grpc_server {
+class grpc_server {
 
-// public:
-//   grpc_server(grpc::Channel addr, string &classif_config, int debug_mode = 0);
+public:
+  grpc_server(grpc::Channel addr, string &classif_config, int debug_mode = 0);
 
-//   void init(size_t thr = 2);
-//   void start();
-//   void shutdown() {}
+  void init(size_t thr = 2);
+  void start();
+  void shutdown() {}
 
-// private:
-//   int _debug_mode;
-//   std::vector<classifier *> _list_classifs;
-//   std::vector<std::pair<fasttext::real, std::string>>
-//   askClassification(std::string &text, std::string &domain, int count, float threshold);
+private:
+  int _debug_mode;
+  std::vector<classifier *> _list_classifs;
+  std::vector<std::pair<fasttext::real, std::string>>
+  askClassification(std::string &text, std::string &domain, int count, float threshold);
 
-//   void writeLog(string text_to_log) { }
-// };
+  void writeLog(string text_to_log) { }
+};
 
-// void RunGRPCServer();
+void RunGRPCServer();
 
 #endif // __GRPC_SERVER_H
