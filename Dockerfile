@@ -37,7 +37,7 @@ COPY . /opt/text-classfier
 
 WORKDIR /opt/text-classfier
 
-RUN ./install.sh
+RUN bash ./install.sh
 
 RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
 
