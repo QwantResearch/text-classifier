@@ -85,18 +85,15 @@ int main(int argc, char **argv) {
   cout << "Using port " << num_port << endl;
   cout << "Using config file " << model_config << endl;
 
+  AbstractServer *classification_api;
+
   if (server_type == 0) {
-    Pistache::Port port(num_port);
-    Address addr(Ipv4::any(), port);
-
-    rest_server classification_api(addr, model_config, debug);
-
-    classification_api.init(threads);
-    classification_api.start();
-    classification_api.shutdown();
+    classification_api = new rest_server(num_port, model_config, debug);
   } else {
-    grpc_server classification_api(num_port, model_config, debug);
-
-    classification_api.init(threads); //TODO: Use threads number
+    classification_api = new grpc_server(num_port, model_config, debug);
   }
+  classification_api->init(threads); //TODO: Use threads number
+  classification_api->start();
+  classification_api->shutdown();
+  delete classification_api;
 }

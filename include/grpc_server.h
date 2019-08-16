@@ -10,7 +10,6 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 #include <time.h>
-#include "yaml-cpp/yaml.h"
 
 #include <grpcpp/grpcpp.h>
 #include <grpc/grpc.h>
@@ -19,49 +18,42 @@
 
 #include "classifier.h"
 #include "tokenizer.h"
+#include "abstract_server.h"
 #include "utils.h"
 
 using namespace std;
 using namespace nlohmann;
 
-class RouteClassifyImpl final : public RouteClassify::Service {
-public:
-  RouteClassifyImpl(string &classif_config);
 
-  grpc::Status GetDomains(grpc::ServerContext* context,
-                          const Empty* request,
-                          Domains* response) override;
-  grpc::Status GetClassif(grpc::ServerContext* context,
-                          const TextToClassify* request,
-                          TextClassified* response) override;
-  grpc::Status RouteClassify(grpc::ServerContext* context,
-                             grpc::ServerReaderWriter< TextClassified, TextToClassify>* stream) override;
+class RouteClassifyImpl;
 
-private:
-  std::vector<classifier *> _list_classifs;
-
-  std::vector<std::pair<fasttext::real, std::string>>
-  askClassification(std::string &text, std::string &domain, int count, float threshold);
-};
-
-class grpc_server {
+class grpc_server : public AbstractServer {//, public RouteClassify::Service {
 
 public:
-  grpc_server(int num_port, string &classif_config, int debug_mode = 0);
-
-  void init(size_t thr = 2);
-  void start();
-  void shutdown() {}
+    using AbstractServer::AbstractServer;
+    void init(size_t thr = 2) override;
+    void start() override;
+    void shutdown() override;
 
 private:
-  int _debug_mode;
-  std::string _server_address;
-  string _classif_config;
-
-
-  void writeLog(string text_to_log) { }
+    RouteClassifyImpl *_service; // TODO: Inquiry the best way to solve this cross-reference (1)
 };
 
-void RunGRPCServer();
+
+class RouteClassifyImpl : public RouteClassify::Service {
+public:
+    RouteClassifyImpl(grpc_server *server);
+private:
+    grpc_server *_server; // TODO: Inquiry the best way to solve this cross-reference (2)
+
+    grpc::Status GetDomains(grpc::ServerContext* context,
+                            const Empty* request,
+                            Domains* response) override;
+    grpc::Status GetClassif(grpc::ServerContext* context,
+                            const TextToClassify* request,
+                            TextClassified* response) override;
+    grpc::Status RouteClassify(grpc::ServerContext* context,
+                                grpc::ServerReaderWriter< TextClassified, TextToClassify>* stream) override;
+};
 
 #endif // __GRPC_SERVER_H

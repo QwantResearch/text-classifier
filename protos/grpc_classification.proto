@@ -27,7 +27,8 @@ message TextClassified {
   int32 count = 3;
   float threshold = 4;
   string domain = 5;
-  repeated Score intention = 6;
+  string tokenized = 6;
+  repeated Score intention = 7;
 }
 
 message Score{

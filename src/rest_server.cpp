@@ -4,14 +4,13 @@
 #include "rest_server.h"
 #include "utils.h"
 
-rest_server::rest_server(Address addr, std::string &classif_config, int debug) {
-  httpEndpoint = std::make_shared<Http::Endpoint>(addr);
-  _debug_mode = debug;
-
-  ProcessCongifFile(classif_config, _list_classifs);
-}
-
 void rest_server::init(size_t thr) {
+  Pistache::Port port(_num_port);
+  Address addr(Ipv4::any(), port);
+  httpEndpoint = std::make_shared<Http::Endpoint>(addr);
+
+  ProcessCongifFile(_classif_config, _list_classifs);
+
   auto opts = Http::Endpoint::options().threads(thr).flags(
       Tcp::Options::InstallSignalHandler);
   httpEndpoint->init(opts);
@@ -195,22 +194,6 @@ void rest_server::fetchParamWithDefault(const nlohmann::json& j,
   }
 }
 
-std::vector<std::pair<fasttext::real, std::string>>
-rest_server::askClassification(std::string &text, std::string &domain,
-                               int count, float threshold) {
-  std::vector<std::pair<fasttext::real, std::string>> to_return;
-  if ((int)text.size() > 0) {
-    auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(),
-                                   [&](classifier *l_classif) {
-                                     return l_classif->getDomain() == domain;
-                                   });
-    if (it_classif != _list_classifs.end()) {
-      to_return = (*it_classif)->prediction(text, count, threshold);
-    }
-  }
-  return to_return;
-}
-
 bool rest_server::process_localization(string &input, json &output) {
   string token(input.c_str());
   if (input.find("à ") == 0)
@@ -230,4 +213,8 @@ void rest_server::doAuth(const Rest::Request &request,
   printCookies(request);
   response.cookies().add(Http::Cookie("lang", "fr-FR"));
   response.send(Http::Code::Ok);
+}
+
+void rest_server::shutdown() {
+  httpEndpoint->shutdown(); 
 }

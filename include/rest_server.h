@@ -14,27 +14,24 @@
 #include <pistache/router.h>
 #include <sstream>
 #include <time.h>
-#include "yaml-cpp/yaml.h"
 
 #include "classifier.h"
 #include "tokenizer.h"
+#include "abstract_server.h"
 
 using namespace std;
 using namespace nlohmann;
 using namespace Pistache;
 
-class rest_server {
+class rest_server : public AbstractServer {
 
 public:
-  rest_server(Address addr, string &classif_config, int debug_mode = 0);
-
-  void init(size_t thr = 2);
-  void start();
-  void shutdown() { httpEndpoint->shutdown(); }
+  using AbstractServer::AbstractServer;
+  void init(size_t thr = 2) override;
+  void start() override;
+  void shutdown() override;
 
 private:
-  int _debug_mode;
-  std::vector<classifier *> _list_classifs;
   std::shared_ptr<Http::Endpoint> httpEndpoint;
   Rest::Router router;
   typedef std::mutex Lock;
@@ -58,9 +55,6 @@ private:
                               int& count,
                               float& threshold,
                               bool& debugmode);
-
-  std::vector<std::pair<fasttext::real, std::string>>
-  askClassification(std::string &text, std::string &domain, int count, float threshold);
 
   bool process_localization(string &input, json &output);
 
