@@ -19,22 +19,13 @@ grpc::Status RouteClassifyImpl:: GetClassif(grpc::ServerContext* context,
 
       // TODO: add debug logs
 
-      std::string text = request->text();
-      std::string domain = request->domain();
-      std::string language = request->language();
+      PrepareOutput(request, response);
 
-      tokenizer l_tok(language, true);
-      std::string tokenized = l_tok.tokenize_str(text);
-
-      response->set_text(text);
-      response->set_language(language);
-      response->set_domain(domain);
-      response->set_tokenized(tokenized);
-      response->set_count(request->count());
-      response->set_threshold(request->threshold());
+      std::string tokenized = response->tokenized();
+      std::string domain = response->domain();
 
       std::vector<std::pair<fasttext::real, std::string>> results;
-      results = _server->askClassification(tokenized, domain, request->count(), request->threshold());
+      results = _server->askClassification(tokenized, domain, response->count(), response->threshold());
 
       for (auto& it: results){
         Score *score = response->add_intention();
@@ -46,11 +37,46 @@ grpc::Status RouteClassifyImpl:: GetClassif(grpc::ServerContext* context,
       return grpc::Status::OK;
 }
 
-grpc::Status RouteClassifyImpl::RouteClassify(grpc::ServerContext* context,
+grpc::Status RouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
                                               grpc::ServerReaderWriter< TextClassified, 
                                               TextToClassify>* stream) {
-    // TODO: Implement if needed
+    TextToClassify request;
+    while (stream->Read(&request)) {
+      TextClassified response;
+      PrepareOutput(&request, &response);
+
+      std::string tokenized = response.tokenized();
+      std::string domain = response.domain();
+
+      std::vector<std::pair<fasttext::real, std::string>> results;
+      results = _server->askClassification(tokenized, domain, response.count(), response.threshold());
+
+      for (auto& it: results){
+        Score *score = response.add_intention();
+        score->set_label(it.second);
+        score->set_confidence(it.first);
+        // TODO: do we need to delete Score?
+      }
+
+      stream->Write(response);
+    }
+
     return grpc::Status::OK;
+}
+
+void RouteClassifyImpl::PrepareOutput(const TextToClassify* request, TextClassified* response) {
+      std::string text = request->text();
+      std::string language = request->language();
+
+      tokenizer l_tok(language, true);
+      std::string tokenized = l_tok.tokenize_str(text);
+
+      response->set_text(request->text());
+      response->set_language(request->language());
+      response->set_domain(request->domain());
+      response->set_count(request->count());
+      response->set_threshold(request->threshold());
+      response->set_tokenized(tokenized);
 }
 
 RouteClassifyImpl::RouteClassifyImpl(grpc_server *server){

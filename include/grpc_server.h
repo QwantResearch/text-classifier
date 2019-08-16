@@ -52,8 +52,10 @@ private:
     grpc::Status GetClassif(grpc::ServerContext* context,
                             const TextToClassify* request,
                             TextClassified* response) override;
-    grpc::Status RouteClassify(grpc::ServerContext* context,
+    grpc::Status StreamClassify(grpc::ServerContext* context,
                                 grpc::ServerReaderWriter< TextClassified, TextToClassify>* stream) override;
+
+    void PrepareOutput(const TextToClassify* request, TextClassified* response);
 };
 
 #endif // __GRPC_SERVER_H

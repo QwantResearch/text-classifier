@@ -3,7 +3,7 @@ syntax = "proto3";
 service RouteClassify {
     rpc GetDomains(Empty) returns (Domains) {}
     rpc GetClassif(TextToClassify) returns (TextClassified) {}
-    rpc RouteClassify(stream TextToClassify) returns (stream TextClassified) {}
+    rpc StreamClassify(stream TextToClassify) returns (stream TextClassified) {}
 }
 
 message Empty {
