@@ -67,6 +67,8 @@ set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/text-classifier.cpp
                      ${PROJECT_SOURCE_DIR}/src/tokenizer.cpp
                      ${PROJECT_SOURCE_DIR}/src/classifier.cpp
                      ${PROJECT_SOURCE_DIR}/src/utils.cpp
+                     ${PROJECT_SOURCE_DIR}/src/classifier_controller.cpp
+                     ${PROJECT_SOURCE_DIR}/src/grpc_route_classify_impl.cpp
                      ${CMAKE_CURRENT_BINARY_DIR}/grpc_classification.grpc.pb.cc
                      ${CMAKE_CURRENT_BINARY_DIR}/grpc_classification.pb.cc
                      ${CMAKE_CURRENT_BINARY_DIR}/grpc_classification.grpc.pb.h

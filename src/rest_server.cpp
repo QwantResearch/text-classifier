@@ -9,8 +9,6 @@ void rest_server::init(size_t thr) {
   Address addr(Ipv4::any(), port);
   httpEndpoint = std::make_shared<Http::Endpoint>(addr);
 
-  ProcessCongifFile(_classif_config, _list_classifs);
-
   auto opts = Http::Endpoint::options().threads(thr).flags(
       Tcp::Options::InstallSignalHandler);
   httpEndpoint->init(opts);
@@ -44,13 +42,16 @@ void rest_server::doClassificationGet(const Rest::Request &request,
       "GET, POST, DELETE, OPTIONS");
   response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
   response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+
+  bool first_domain = true;
   string response_string = "{\"domains\":[";
-  for (int inc = 0; inc < (int)_list_classifs.size(); inc++) {
-    if (inc > 0)
+  for (auto& it: _classifier_controller->getListClassifs()){
+    if (!first_domain)
       response_string.append(",");
     response_string.append("\"");
-    response_string.append(_list_classifs.at(inc)->getDomain());
+    response_string.append(it->getDomain());
     response_string.append("\"");
+    first_domain = false;
   }
   response_string.append("]}");
   if (_debug_mode != 0)
@@ -90,7 +91,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
       cerr << "LOG: " << currentDateTime() << "\t"
             << "ASK CLASS :\t" << j << endl;
     std::vector<std::pair<fasttext::real, std::string>> results;
-    results = askClassification(tokenized, domain, count, threshold);
+    results = _classifier_controller->askClassification(tokenized, domain, count, threshold);
     j.push_back(
         nlohmann::json::object_t::value_type(string("intention"), results));
     std::string s = j.dump();
@@ -140,7 +141,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
         if (_debug_mode != 0)
           cerr << "LOG: " << currentDateTime() << "\t"
               << "ASK CLASS :\t" << it << endl;
-        auto results = askClassification(tokenized, domain, count, threshold);
+        auto results = _classifier_controller->askClassification(tokenized, domain, count, threshold);
         it.push_back(
             nlohmann::json::object_t::value_type(string("intention"), results));
       } else {

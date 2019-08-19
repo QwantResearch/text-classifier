@@ -22,8 +22,6 @@ void Split(const std::string &line, std::vector<std::string> &pieces,
 
 void printCookies(const Pistache::Http::Request &req);
 
-void ProcessCongifFile(std::string &classif_config, std::vector<classifier *> &_list_classifs);
-
 const std::string currentDateTime();
 
 namespace Generic {
