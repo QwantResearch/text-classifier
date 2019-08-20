@@ -76,7 +76,7 @@ pushd vendor/grpc
 	rm -rf cmake/build
 	mkdir -p cmake/build
 	pushd cmake/build
-		cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_PROTOBUF_PROVIDER=package -DgRPC_ZLIB_PROVIDER=package -DgRPC_CARES_PROVIDER=package -DgRPC_SSL_PROVIDER=package -DCMAKE_BUILD_TYPE=Release --DCMAKE_INSTALL_PREFIX="/usr/local/" ../..
+		cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_PROTOBUF_PROVIDER=package -DgRPC_ZLIB_PROVIDER=package -DgRPC_CARES_PROVIDER=package -DgRPC_SSL_PROVIDER=package -DCMAKE_BUILD_TYPE=Release --DCMAKE_INSTALL_PREFIX="${PREFIX}" ../..
 		# See https://github.com/grpc/grpc/issues/13841
 		# Appears to be a problem with multi-threading, if make -j 4 doesn't work, use make -j 1
 			make -j 4 && make install
