@@ -10,6 +10,8 @@ grpc::Status GrpcRouteClassifyImpl::GetDomains(grpc::ServerContext* context,
   for (auto& it: _classifier_controller->getListClassifs()) {
     response->add_domains(it->getDomain());
   }
+  if (_debug_mode)
+    cerr << "LOG: " << currentDateTime() << "\t" << "GetDomains" << endl;
   return grpc::Status::OK;
 }
 
@@ -17,7 +19,10 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
                                                const TextToClassify* request,
                                                TextClassified* response) {
 
-  // TODO: add debug logs
+  if (_debug_mode) {
+    cerr << "LOG: " << currentDateTime() << "\t" << "GetClassif";
+    cerr << "\t" << request->text() << "\t";
+  }
 
   PrepareOutput(request, response);
 
@@ -27,11 +32,17 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
   std::vector<std::pair<fasttext::real, std::string>> results;
   results = _classifier_controller->askClassification(tokenized, domain, response->count(), response->threshold());
 
+  if (_debug_mode)
+    cerr << "Labels:";
   for (auto& it: results) {
     Score *score = response->add_intention();
     score->set_label(it.second);
     score->set_confidence(it.first);
+    if (_debug_mode)
+      cerr << " (" << score->label() << ", " << score->confidence() << ")";
   }
+  if (_debug_mode)
+    cerr << endl;
 
   return grpc::Status::OK;
 }
@@ -41,6 +52,12 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
                                                                             TextToClassify>* stream) {
   TextToClassify request;
   while (stream->Read(&request)) {
+
+    if (_debug_mode) {
+      cerr << "LOG: " << currentDateTime() << "\t" << "StreamClassify";
+      cerr  << "\t" << request.text() << "\t";
+    }
+
     TextClassified response;
     PrepareOutput(&request, &response);
 
@@ -50,11 +67,17 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
     std::vector<std::pair<fasttext::real, std::string>> results;
     results = _classifier_controller->askClassification(tokenized, domain, response.count(), response.threshold());
 
+    if (_debug_mode)
+      cerr << "Labels:";
     for (auto& it: results) {
       Score *score = response.add_intention();
       score->set_label(it.second);
       score->set_confidence(it.first);
+      if (_debug_mode)
+        cerr << " (" << score->label() << ", " << score->confidence() << ")";
     }
+    if (_debug_mode)
+      cerr << endl;
 
     stream->Write(response);
   }
@@ -77,6 +100,7 @@ void GrpcRouteClassifyImpl::PrepareOutput(const TextToClassify* request, TextCla
   response->set_tokenized(tokenized);
 }
 
-GrpcRouteClassifyImpl::GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller) {
+GrpcRouteClassifyImpl::GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller, int debug_mode) {
   _classifier_controller = classifier_controller;
+  _debug_mode = debug_mode;
 }

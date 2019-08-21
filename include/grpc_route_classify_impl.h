@@ -12,10 +12,11 @@
 #include "tokenizer.h"
 #include "classifier_controller.h"
 #include "abstract_server.h"
+#include "utils.h"
 
 class GrpcRouteClassifyImpl : public RouteClassify::Service {
 public:
-    GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller);
+    GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller, int debug_mode);
     ~GrpcRouteClassifyImpl() {};
 private:
     grpc::Status GetDomains(grpc::ServerContext* context,
@@ -30,6 +31,7 @@ private:
     void PrepareOutput(const TextToClassify* request, TextClassified* response);
 
     shared_ptr<ClassifierController> _classifier_controller;
+    int _debug_mode;
 };
 
 #endif // __GRPC_ROUTE_CLASSIFY_IMPL_H

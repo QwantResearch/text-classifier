@@ -4,7 +4,7 @@
 #include "grpc_server.h"
 
 void grpc_server::init(size_t thr){ //TODO: Check how to use thread number in grpc
-  _service = new GrpcRouteClassifyImpl(_classifier_controller);
+  _service = new GrpcRouteClassifyImpl(_classifier_controller, _debug_mode);
 }
 
 void grpc_server::start(){
