@@ -56,8 +56,6 @@ include_directories(${PROJECT_SOURCE_DIR}/include/ /usr/local/include/ /usr/)
 
 link_directories(/usr/local/lib/ /usr/lib/)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -lpthread")
-
 set(CLASS_EXECUTABLE_API text-classifier)
 
 set(CLASS_SOURCE_API ${PROJECT_SOURCE_DIR}/src/text-classifier.cpp
