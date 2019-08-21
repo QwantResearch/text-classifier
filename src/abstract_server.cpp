@@ -7,5 +7,5 @@ AbstractServer::AbstractServer(int num_port, string &classif_config, int debug_m
   _num_port = num_port;
   _debug_mode = debug_mode;
 
-  _classifier_controller = new ClassifierController(classif_config);
+  _classifier_controller = make_shared<ClassifierController>(classif_config);
 }

@@ -31,7 +31,6 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
     Score *score = response->add_intention();
     score->set_label(it.second);
     score->set_confidence(it.first);
-    // TODO: do we need to delete Score?
   }
 
   return grpc::Status::OK;
@@ -55,7 +54,6 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
       Score *score = response.add_intention();
       score->set_label(it.second);
       score->set_confidence(it.first);
-      // TODO: do we need to delete Score?
     }
 
     stream->Write(response);
@@ -79,6 +77,6 @@ void GrpcRouteClassifyImpl::PrepareOutput(const TextToClassify* request, TextCla
   response->set_tokenized(tokenized);
 }
 
-GrpcRouteClassifyImpl::GrpcRouteClassifyImpl(ClassifierController *classifier_controller) {
+GrpcRouteClassifyImpl::GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller) {
   _classifier_controller = classifier_controller;
 }

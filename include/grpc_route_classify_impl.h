@@ -15,7 +15,7 @@
 
 class GrpcRouteClassifyImpl : public RouteClassify::Service {
 public:
-    GrpcRouteClassifyImpl(ClassifierController *classifier_controller);
+    GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller);
     ~GrpcRouteClassifyImpl() {};
 private:
     grpc::Status GetDomains(grpc::ServerContext* context,
@@ -29,7 +29,7 @@ private:
 
     void PrepareOutput(const TextToClassify* request, TextClassified* response);
 
-    ClassifierController *_classifier_controller;
+    shared_ptr<ClassifierController> _classifier_controller;
 };
 
 #endif // __GRPC_ROUTE_CLASSIFY_IMPL_H

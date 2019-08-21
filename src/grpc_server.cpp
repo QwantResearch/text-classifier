@@ -20,6 +20,6 @@ void grpc_server::start(){
 }
 
 void grpc_server::shutdown(){
-  // TODO
+  // TODO: /!\ can't shutdown from same thread
 }
 

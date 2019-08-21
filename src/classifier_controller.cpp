@@ -65,3 +65,8 @@ ClassifierController::askClassification(std::string &text, std::string &domain,
   return to_return;
 }
 
+ClassifierController::~ClassifierController() {
+  for (auto classifier: _list_classifs){
+    delete classifier;
+  }
+}

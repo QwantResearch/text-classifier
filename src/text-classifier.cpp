@@ -85,15 +85,14 @@ int main(int argc, char **argv) {
   cout << "Using port " << num_port << endl;
   cout << "Using config file " << model_config << endl;
 
-  AbstractServer *classification_api;
+  unique_ptr<AbstractServer> classification_api;
 
   if (server_type == 0) {
-    classification_api = new rest_server(num_port, model_config, debug);
+    classification_api = std::unique_ptr<rest_server>(new rest_server(num_port, model_config, debug));
   } else {
-    classification_api = new grpc_server(num_port, model_config, debug);
+    classification_api = std::unique_ptr<grpc_server>(new grpc_server(num_port, model_config, debug));
   }
   classification_api->init(threads); //TODO: Use threads number
   classification_api->start();
   classification_api->shutdown();
-  delete classification_api;
 }

@@ -30,7 +30,7 @@ class grpc_server : public AbstractServer {//, public RouteClassify::Service {
 
 public:
     using AbstractServer::AbstractServer;
-    ~grpc_server() {} // TODO delete _service
+    ~grpc_server() {delete _service;}
     void init(size_t thr = 2) override;
     void start() override;
     void shutdown() override;

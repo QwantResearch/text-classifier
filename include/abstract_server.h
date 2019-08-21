@@ -16,7 +16,7 @@ using namespace std;
 class AbstractServer {
 public:
     AbstractServer(int num_port, string &classif_config, int debug_mode);
-    virtual ~AbstractServer() {}; // TODO destroy _classifier_controller
+    virtual ~AbstractServer() {}
     virtual void init(size_t thr = 2) = 0;
     virtual void start() = 0;
     virtual void shutdown() = 0;
@@ -24,7 +24,7 @@ public:
 protected:
   int _debug_mode;
   int _num_port;
-  ClassifierController *_classifier_controller;
+  std::shared_ptr<ClassifierController> _classifier_controller;
 };
 
 #endif // __ABSTRACT_SERVER_H

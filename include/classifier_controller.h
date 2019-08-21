@@ -14,7 +14,7 @@
 class ClassifierController {
 public:
   ClassifierController(std::string &classif_config);
-  ~ClassifierController() {} // TODO: destroy _list_classifs
+  ~ClassifierController();
   std::vector<classifier *> getListClassifs();
   std::vector<std::pair<fasttext::real, std::string>> askClassification(std::string &text, 
                                                                       std::string &domain,
