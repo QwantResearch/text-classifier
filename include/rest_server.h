@@ -14,29 +14,25 @@
 #include <pistache/router.h>
 #include <sstream>
 #include <time.h>
-#include "yaml-cpp/yaml.h"
 
 #include "classifier.h"
 #include "tokenizer.h"
+#include "abstract_server.h"
 
 using namespace std;
 using namespace nlohmann;
 using namespace Pistache;
 
-class rest_server {
+class rest_server : public AbstractServer {
 
 public:
-  rest_server(string &classif_config, int &threads, int debug_mode = 0);
-  ~rest_server(){httpEndpoint->shutdown();};
-
-  void init();
-  void start();
-  void shutdown() { httpEndpoint->shutdown();}
+  using AbstractServer::AbstractServer;
+  ~rest_server(){httpEndpoint->shutdown();}
+  void init(size_t thr = 2) override;
+  void start() override;
+  void shutdown() override;
 
 private:
-  int _debug_mode;
-  int _nbr_threads;
-  std::vector<classifier *> _list_classifs;
   std::shared_ptr<Http::Endpoint> httpEndpoint;
   Rest::Router router;
   typedef std::mutex Lock;
@@ -54,14 +50,13 @@ private:
   void doClassificationBatchPost(const Rest::Request &request,
                                  Http::ResponseWriter response);
 
-  void fetchParamWithDefault(const json& j, 
-                              string& domain, 
+  void fetchParamWithDefault(const json& j,
+                              string& domain,
                               int& count,
                               float& threshold,
                               bool& debugmode);
 
-  std::vector<std::pair<fasttext::real, std::string>>
-  askClassification(std::string &text, std::string &tokenized_text, std::string &domain, int count, float threshold);
+  bool process_localization(string &input, json &output);
 
   void writeLog(string text_to_log) {}
 

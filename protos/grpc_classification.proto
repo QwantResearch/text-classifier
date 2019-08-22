@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+service RouteClassify {
+    rpc GetDomains(Empty) returns (Domains) {}
+    rpc GetClassif(TextToClassify) returns (TextClassified) {}
+    rpc StreamClassify(stream TextToClassify) returns (stream TextClassified) {}
+}
+
+message Empty {
+}
+
+message Domains {
+    repeated string domains = 1;
+}
+
+message TextToClassify {
+  string text = 1;
+  int32 count = 3;
+  float threshold = 4;
+  string domain = 5;
+}
+
+message TextClassified {
+  string text = 1;
+  int32 count = 3;
+  float threshold = 4;
+  string domain = 5;
+  string tokenized = 6;
+  repeated Score intention = 7;
+}
+
+message Score{
+    string label = 1;
+    float confidence = 2;
+}

@@ -17,13 +17,27 @@ RUN apt-get -y update && \
         libboost-regex1.65-dev \
         libyaml-cpp-dev \
         git \
-        cmake
+        cmake \
+        build-essential \
+        autoconf \
+        libtool \
+        pkg-config\
+        clang \
+        libc++-dev \
+        golang \
+        libssl-dev \
+        libgflags-dev \
+        libgtest-dev
+
+# To Keep or not libprotobuf9v5 ??? https://github.com/grpc/grpc/issues/18973
+# Change by libprotobuf10 ?
+# what about libprotoc9v5 libprotoc9v5
 
 COPY . /opt/text-classifier
 
 WORKDIR /opt/text-classifier
 
-RUN ./install.sh
+RUN bash ./install.sh
 
 RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
 

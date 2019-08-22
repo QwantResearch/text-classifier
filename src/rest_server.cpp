@@ -4,71 +4,12 @@
 #include "rest_server.h"
 #include "utils.h"
 
-rest_server::rest_server(std::string &config_file, int &threads, int debug) 
-{
-    std::string line;
-    int port=9009;
-    YAML::Node config;
+void rest_server::init(size_t thr) {
+  Pistache::Port port(_num_port);
+  Address addr(Ipv4::any(), port);
+  httpEndpoint = std::make_shared<Http::Endpoint>(addr);
 
-    try 
-    {
-    // Reading the configuration file for filling the options.
-        config = YAML::LoadFile(config_file);
-        cout << "[INFO]\tDomain\t\tLocation/filename\t\tlanguage"<< endl;
-        threads = config["threads"].as<int>() ;
-        port =  config["port"].as<int>() ;
-        debug =  config["debug"].as<int>() ;
-        YAML::Node modelconfig = config["models"]; 
-        for (const auto& modelnode : modelconfig)
-        {
-            std::string domain=modelnode.first.as<std::string>();
-            YAML::Node modelinfos = modelnode.second;
-            std::string filename=modelinfos["filename"].as<std::string>();
-            std::string lang=modelinfos["language"].as<std::string>();
-            try 
-            {
-                // Creating the set of models for the API
-                if ((int) filename.size() == 0)
-                {
-                    cerr << "[ERROR]\tModel filename is not set for " << domain << endl;
-                    continue;
-                }
-                cout << "[INFO]\t"<< domain << "\t" << filename << "\t" << lang ;
-                classifier* classifier_pointer = new classifier(filename, domain, lang);
-                _list_classifs.push_back(classifier_pointer);
-                cout << "\t===> loaded" << endl;
-            } 
-            catch (invalid_argument& inarg) 
-            {
-                cerr << "[ERROR]\t" << inarg.what() << endl;
-                continue;
-            }
-        }
-    } catch (YAML::BadFile& bf) {
-      cerr << "[ERROR]\t" << bf.what() << endl;
-      exit(1);
-    }
-    _nbr_threads=threads;
-    cout << "[INFO]\tnumber of threads:\t"<< _nbr_threads << endl;
-    cout << "[INFO]\tport used:\t"<< port << endl;
-    if (debug > 0) cout << "[INFO]\tDebug mode activated" << endl;
-    else cout << "[INFO]\tDebug mode desactivated" << endl;
-    if ((int)_list_classifs.size() == 0) 
-    {
-        cerr << "[ERROR]\tNo classification model loaded, exiting." << endl;
-        exit(1);
-    }
-    // Creating the entry point of the REST API.
-    Pistache::Port pport(port);
-    Address addr(Ipv4::any(), pport);
-    httpEndpoint = std::make_shared<Http::Endpoint>(addr);
-    _debug_mode = debug;
-
-}
-
-
-void rest_server::init() {
-  auto opts = Http::Endpoint::options().threads(_nbr_threads).flags(
+  auto opts = Http::Endpoint::options().threads(thr).flags(
       Tcp::Options::InstallSignalHandler);
   httpEndpoint->init(opts);
   setupRoutes();
@@ -101,13 +42,16 @@ void rest_server::doClassificationGet(const Rest::Request &request,
       "GET, POST, DELETE, OPTIONS");
   response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
   response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+
+  bool first_domain = true;
   string response_string = "{\"domains\":[";
-  for (int inc = 0; inc < (int)_list_classifs.size(); inc++) {
-    if (inc > 0)
+  for (auto& it: _classifier_controller->getListClassifs()){
+    if (!first_domain)
       response_string.append(",");
     response_string.append("\"");
-    response_string.append(_list_classifs.at(inc)->getDomain());
+    response_string.append(it->getDomain());
     response_string.append("\"");
+    first_domain = false;
   }
   response_string.append("]}");
   if (_debug_mode != 0)
@@ -143,7 +87,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
     if (_debug_mode != 0)
       cerr << "[DEBUG]\t" << currentDateTime() << "\t" << "ASK CLASS :\t" << j << endl;
     std::vector<std::pair<fasttext::real, std::string>> results;
-    results = askClassification(text, tokenized, domain, count, threshold);
+    results = _classifier_controller->askClassification(text, tokenized, domain, count, threshold);
     if ((int)results.size() > 0)
     {
         if ((int)results[0].second.compare("DOMAIN ERROR")==0)
@@ -195,7 +139,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
         string tokenized;
         if (_debug_mode != 0)
           cerr << "[DEBUG]\t" << currentDateTime() << "\tASK CLASS:\t" << it << endl;
-        auto results = askClassification(text, tokenized, domain, count, threshold);
+        auto results = _classifier_controller->askClassification(text, tokenized, domain, count, threshold);
         if ((int)results.size() > 0)
         {
             if ((int)results[0].second.compare("DOMAIN ERROR")==0)
@@ -255,31 +199,13 @@ void rest_server::fetchParamWithDefault(const nlohmann::json& j,
   }
 }
 
-std::vector<std::pair<fasttext::real, std::string>>
-rest_server::askClassification(std::string &text, std::string &tokenized_text, std::string &domain,
-                               int count, float threshold) {
-  std::vector<std::pair<fasttext::real, std::string>> to_return;
-  if ((int)text.size() > 0) 
-  {
-      auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(), [&](classifier *l_classif)
-                                    {
-                                        return l_classif->getDomain() == domain;
-                                    });
-      if (it_classif != _list_classifs.end()) 
-      {
-          to_return = (*it_classif)->prediction(text, tokenized_text, count, threshold);
-      }
-      else
-      {
-          to_return.push_back(std::pair<fasttext::real, std::string>(0.0,"DOMAIN ERROR"));
-      }
-  }
-  return to_return;
-}
-
 void rest_server::doAuth(const Rest::Request &request,
                          Http::ResponseWriter response) {
   printCookies(request);
   response.cookies().add(Http::Cookie("lang", "fr-FR"));
   response.send(Http::Code::Ok);
+}
+
+void rest_server::shutdown() {
+  httpEndpoint->shutdown(); 
 }

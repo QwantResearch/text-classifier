@@ -6,11 +6,16 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include <pistache/client.h>
 #include <pistache/endpoint.h>
 #include <pistache/http.h>
 #include <pistache/router.h>
+#include "yaml-cpp/yaml.h"
+
+#include "classifier.h"
+
 
 void Split(const std::string &line, std::vector<std::string> &pieces,
            const std::string del);

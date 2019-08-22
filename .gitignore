@@ -36,3 +36,6 @@
 
 # CMake
 build/*
+
+# Generated python
+grpc_classification_pb2*
