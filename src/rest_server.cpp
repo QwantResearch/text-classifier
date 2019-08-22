@@ -55,7 +55,7 @@ void rest_server::doClassificationGet(const Rest::Request &request,
   }
   response_string.append("]}");
   if (_debug_mode != 0)
-    cerr << "LOG: " << currentDateTime() << "\t" << response_string << endl;
+    cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << response_string << endl;
   response.send(Pistache::Http::Code::Ok, response_string);
 }
 
@@ -71,39 +71,43 @@ void rest_server::doClassificationPost(const Rest::Request &request,
   int count;
   float threshold;
   bool debugmode;
-  string language, domain;
+  string domain;
   
   try {
-    rest_server::fetchParamWithDefault(j, domain, language, count, threshold, debugmode);
+    rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode);
   } catch (std::runtime_error e) {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Bad_Request, e.what());
   }
 
-  tokenizer l_tok(language, true);
-
-  if (j.find("text") != j.end()) {
+  if (j.find("text") != j.end()) 
+  {
     string text = j["text"];
-    string tokenized = l_tok.tokenize_str(text);
-    j.push_back(nlohmann::json::object_t::value_type(
-        string("tokenized"), tokenized));
+    string tokenized;
     if (_debug_mode != 0)
-      cerr << "LOG: " << currentDateTime() << "\t"
-            << "ASK CLASS :\t" << j << endl;
+      cerr << "[DEBUG]\t" << currentDateTime() << "\t" << "ASK CLASS :\t" << j << endl;
     std::vector<std::pair<fasttext::real, std::string>> results;
-    results = _classifier_controller->askClassification(tokenized, domain, count, threshold);
-    j.push_back(
-        nlohmann::json::object_t::value_type(string("intention"), results));
+    results = _classifier_controller->askClassification(text, tokenized, domain, count, threshold);
+    if ((int)results.size() > 0)
+    {
+        if ((int)results[0].second.compare("DOMAIN ERROR")==0)
+        {
+            response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+            response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
+            cerr << "[ERROR]\t" << currentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
+            return;
+        }
+    }
+    j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
+    j.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
     std::string s = j.dump();
     if (_debug_mode != 0)
-      cerr << "LOG: " << currentDateTime() << "\t" << s << endl;
-    response.headers().add<Http::Header::ContentType>(
-        MIME(Application, Json));
+      cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << s << endl;
+    response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Ok, std::string(s));
   } else {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-    response.send(Http::Code::Bad_Request,
-                  std::string("The `text` value is required"));
+    response.send(Http::Code::Bad_Request,std::string("The `text` value is required"));
   }
 }
 
@@ -119,32 +123,38 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
   int count;
   float threshold;
   bool debugmode;
-  string language;
   string domain;
   
   try {
-    rest_server::fetchParamWithDefault(j, domain, language, count, threshold, debugmode);
+    rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode);
   } catch (std::runtime_error e) {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Bad_Request, e.what());
   }
   
-  tokenizer l_tok(language, true);
-  
   if (j.find("batch_data") != j.end()) {
     for (auto& it: j["batch_data"]){
       if (it.find("text") != it.end()) {
         string text = it["text"];
-        string tokenized = l_tok.tokenize_str(text);
-        it.push_back(nlohmann::json::object_t::value_type(
-            string("tokenized"), tokenized));
+        string tokenized;
         if (_debug_mode != 0)
-          cerr << "LOG: " << currentDateTime() << "\t"
-              << "ASK CLASS :\t" << it << endl;
-        auto results = _classifier_controller->askClassification(tokenized, domain, count, threshold);
-        it.push_back(
-            nlohmann::json::object_t::value_type(string("intention"), results));
-      } else {
+          cerr << "[DEBUG]\t" << currentDateTime() << "\tASK CLASS:\t" << it << endl;
+        auto results = _classifier_controller->askClassification(text, tokenized, domain, count, threshold);
+        if ((int)results.size() > 0)
+        {
+            if ((int)results[0].second.compare("DOMAIN ERROR")==0)
+            {
+                response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+                response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
+                cerr << "[ERROR]\t" << currentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
+                return;
+            }
+        }
+        it.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
+        it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));        
+      } 
+      else 
+      {
         response.headers().add<Http::Header::ContentType>(
             MIME(Application, Json));
         response.send(Http::Code::Bad_Request,
@@ -153,7 +163,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
     }
     std::string s = j.dump();
     if (_debug_mode != 0)
-      cerr << "LOG: " << currentDateTime() << "\t" << s << endl;
+      cerr << "[DEBUG]\t" << currentDateTime() << "\tRESULT CLASS:\t" << s << endl;
     response.headers().add<Http::Header::ContentType>(
         MIME(Application, Json));
     response.send(Http::Code::Ok, std::string(s));
@@ -166,7 +176,6 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
 
 void rest_server::fetchParamWithDefault(const nlohmann::json& j, 
                             string& domain, 
-                            string& language,
                             int& count,
                             float& threshold,
                             bool& debugmode){
@@ -183,30 +192,11 @@ void rest_server::fetchParamWithDefault(const nlohmann::json& j,
   if (j.find("debug") != j.end()) {
     debugmode = j["debug"];
   }
-  if (j.find("language") != j.end()) {
-    language = j["language"];
-  } else {
-    throw std::runtime_error("`language` value is null");
-  }
   if (j.find("domain") != j.end()) {
     domain = j["domain"];
   } else {
     throw std::runtime_error("`domain` value is null");
   }
-}
-
-bool rest_server::process_localization(string &input, json &output) {
-  string token(input.c_str());
-  if (input.find("à ") == 0)
-    token = input.substr(3);
-  if (input.find("au dessus de ") == 0)
-    token = input.substr(13);
-  if (input.find("au ") == 0)
-    token = input.substr(4);
-  if (input.find("vers ") == 0)
-    token = input.substr(5);
-  output.push_back(
-      nlohmann::json::object_t::value_type(string("label"), token));
 }
 
 void rest_server::doAuth(const Rest::Request &request,

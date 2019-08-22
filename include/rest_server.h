@@ -27,6 +27,7 @@ class rest_server : public AbstractServer {
 
 public:
   using AbstractServer::AbstractServer;
+  ~rest_server(){httpEndpoint->shutdown();}
   void init(size_t thr = 2) override;
   void start() override;
   void shutdown() override;
@@ -49,9 +50,8 @@ private:
   void doClassificationBatchPost(const Rest::Request &request,
                                  Http::ResponseWriter response);
 
-  void fetchParamWithDefault(const json& j, 
-                              string& domain, 
-                              string& language,
+  void fetchParamWithDefault(const json& j,
+                              string& domain,
                               int& count,
                               float& threshold,
                               bool& debugmode);

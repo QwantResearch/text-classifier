@@ -15,7 +15,6 @@ message Domains {
 
 message TextToClassify {
   string text = 1;
-  string language = 2;
   int32 count = 3;
   float threshold = 4;
   string domain = 5;
@@ -23,7 +22,6 @@ message TextToClassify {
 
 message TextClassified {
   string text = 1;
-  string language = 2;
   int32 count = 3;
   float threshold = 4;
   string domain = 5;

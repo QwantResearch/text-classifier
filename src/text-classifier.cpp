@@ -8,6 +8,7 @@
 #include "rest_server.h"
 #include "grpc_server.h"
 
+// default values
 int num_port = 9009;
 int threads = 1;
 int debug = 0;

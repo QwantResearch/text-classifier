@@ -33,9 +33,9 @@ RUN apt-get -y update && \
 # Change by libprotobuf10 ?
 # what about libprotoc9v5 libprotoc9v5
 
-COPY . /opt/text-classfier
+COPY . /opt/text-classifier
 
-WORKDIR /opt/text-classfier
+WORKDIR /opt/text-classifier
 
 RUN bash ./install.sh
 

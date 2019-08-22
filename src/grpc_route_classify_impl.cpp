@@ -11,7 +11,7 @@ grpc::Status GrpcRouteClassifyImpl::GetDomains(grpc::ServerContext* context,
     response->add_domains(it->getDomain());
   }
   if (_debug_mode)
-    cerr << "LOG: " << currentDateTime() << "\t" << "GetDomains" << endl;
+    cerr << "[DEBUG]: " << currentDateTime() << "\t" << "GetDomains" << endl;
   return grpc::Status::OK;
 }
 
@@ -20,17 +20,19 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
                                                TextClassified* response) {
 
   if (_debug_mode) {
-    cerr << "LOG: " << currentDateTime() << "\t" << "GetClassif";
+    cerr << "[DEBUG]: " << currentDateTime() << "\t" << "GetClassif";
     cerr << "\t" << request->text() << "\t";
   }
 
   PrepareOutput(request, response);
 
-  std::string tokenized = response->tokenized();
+  std::string text = response->text();
   std::string domain = response->domain();
+  std::string tokenized;
 
   std::vector<std::pair<fasttext::real, std::string>> results;
-  results = _classifier_controller->askClassification(tokenized, domain, response->count(), response->threshold());
+  results = _classifier_controller->askClassification(text, tokenized, domain, response->count(), response->threshold());
+  response->set_tokenized(tokenized);
 
   if (_debug_mode)
     cerr << "Labels:";
@@ -54,18 +56,20 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
   while (stream->Read(&request)) {
 
     if (_debug_mode) {
-      cerr << "LOG: " << currentDateTime() << "\t" << "StreamClassify";
+      cerr << "[DEBUG]: " << currentDateTime() << "\t" << "StreamClassify";
       cerr  << "\t" << request.text() << "\t";
     }
 
     TextClassified response;
     PrepareOutput(&request, &response);
 
-    std::string tokenized = response.tokenized();
+    std::string text = response.text();
     std::string domain = response.domain();
+    std::string tokenized;
 
     std::vector<std::pair<fasttext::real, std::string>> results;
-    results = _classifier_controller->askClassification(tokenized, domain, response.count(), response.threshold());
+    results = _classifier_controller->askClassification(text, tokenized, domain, response.count(), response.threshold());
+    response.set_tokenized(tokenized);
 
     if (_debug_mode)
       cerr << "Labels:";
@@ -87,17 +91,11 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
 
 void GrpcRouteClassifyImpl::PrepareOutput(const TextToClassify* request, TextClassified* response) {
   std::string text = request->text();
-  std::string language = request->language();
-
-  tokenizer l_tok(language, true);
-  std::string tokenized = l_tok.tokenize_str(text);
 
   response->set_text(request->text());
-  response->set_language(request->language());
   response->set_domain(request->domain());
   response->set_count(request->count());
   response->set_threshold(request->threshold());
-  response->set_tokenized(tokenized);
 }
 
 GrpcRouteClassifyImpl::GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller, int debug_mode) {

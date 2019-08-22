@@ -17,6 +17,7 @@ public:
   ~ClassifierController();
   std::vector<classifier *> getListClassifs();
   std::vector<std::pair<fasttext::real, std::string>> askClassification(std::string &text, 
+                                                                      std::string &tokenized,
                                                                       std::string &domain,
                                                                       int count,
                                                                       float threshold);
