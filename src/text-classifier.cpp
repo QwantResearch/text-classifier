@@ -82,8 +82,9 @@ void ProcessArgs(int argc, char **argv) {
 int main(int argc, char **argv) {
   if (getenv("API_TC_THREADS") != NULL) { threads=atoi(getenv("API_TC_THREADS")); }
   if (getenv("API_TC_PORT") != NULL) { num_port=atoi(getenv("API_TC_PORT")); }
-  if (getenv("API_TC_CONFIG") != NULL) { model_config=getenv("API_TC_CONFIG"); }
   if (getenv("API_TC_GRPC") != NULL) { server_type = atoi(getenv("API_TC_GRPC")); }
+  if (getenv("API_TC_DEBUG") != NULL) { server_type = atoi(getenv("API_TC_DEBUG")); }
+  if (getenv("API_TC_CONFIG") != NULL) { model_config=getenv("API_TC_CONFIG"); }
 
   ProcessArgs(argc, argv);
 
