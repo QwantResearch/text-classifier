@@ -19,8 +19,16 @@ docker build -t text-classifier:latest .
 --port (-p)              port to use (default 9009)
 --threads (-t)           number of threads (default 1)
 --debug (-d)             debug mode (default false)
+--grpc (-g)              use grpc service instead of rest
 --help (-h)              show this message
 ```
+
+You can also use environment variable to configure the API:
+ * threads: API_TC_THREADS
+ * port: API_TC_PORT
+ * model-config: API_TC_CONFIG
+ * grpc: API_TC_GRPC
+ * debug: API_TC_DEBUG
 
 ## Licencing
 
