@@ -4,6 +4,7 @@
 #include <getopt.h>
 #include <iostream>
 #include <string>
+#include <cstdlib>
 
 #include "rest_server.h"
 #include "grpc_server.h"
@@ -72,25 +73,32 @@ void ProcessArgs(int argc, char **argv) {
     }
   }
   if (model_config == "") {
-    cerr << "Error, you must set a config file" << endl;
+    cerr << "[ERROR]\t" << currentDateTime() << "\tError, you must set a config file" << endl;
     usage();
     exit(1);
   }
 }
 
 int main(int argc, char **argv) {
+  if (getenv("API_TC_THREADS") != NULL) { threads=atoi(getenv("API_TC_THREADS")); }
+  if (getenv("API_TC_PORT") != NULL) { num_port=atoi(getenv("API_TC_PORT")); }
+  if (getenv("API_TC_CONFIG") != NULL) { model_config=getenv("API_TC_CONFIG"); }
+  if (getenv("API_TC_GRPC") != NULL) { server_type = atoi(getenv("API_TC_GRPC")); }
+
   ProcessArgs(argc, argv);
 
-  cout << "Cores = " << hardware_concurrency() << endl;
-  cout << "Using " << threads << " threads" << endl;
-  cout << "Using port " << num_port << endl;
-  cout << "Using config file " << model_config << endl;
+  cout << "[INFO]\t" << currentDateTime() << "\tCores = " << hardware_concurrency() << endl;
+  cout << "[INFO]\t" << currentDateTime() << "\tUsing " << threads << " threads" << endl;
+  cout << "[INFO]\t" << currentDateTime() << "\tUsing port " << num_port << endl;
+  cout << "[INFO]\t" << currentDateTime() << "\tUsing config file " << model_config << endl;
 
   unique_ptr<AbstractServer> classification_api;
 
   if (server_type == 0) {
+    cout << "[INFO]\t" << currentDateTime() << "\tUsing REST API" << endl;
     classification_api = std::unique_ptr<rest_server>(new rest_server(num_port, model_config, debug));
   } else {
+    cout << "[INFO]\t" << currentDateTime() << "\tUsing gRPC API" << endl;
     classification_api = std::unique_ptr<grpc_server>(new grpc_server(num_port, model_config, debug));
   }
   classification_api->init(threads); //TODO: Use threads number
