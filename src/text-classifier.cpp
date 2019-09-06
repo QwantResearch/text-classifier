@@ -18,7 +18,7 @@ int server_type = 0; // 0 -> REST, 1 -> GRPC
 
 void usage() {
   cout << "./text-classifier --model-config <filename> [--port <port>] "
-          "[--threads <nthreads>] [--debug]\n\n"
+          "[--threads <nthreads>] [--debug] [--grpc]\n\n"
           "\t--grpc (-g)              use grpc service instead of rest\n"
           "\t--port (-p)              port to use (default 9009)\n"
           "\t--threads (-t)           number of threads (default 1)\n"
