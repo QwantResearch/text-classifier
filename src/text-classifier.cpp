@@ -15,16 +15,17 @@ int threads = 1;
 int debug = 0;
 std::string model_config("");
 int server_type = 0; // 0 -> REST, 1 -> GRPC
+bool* set_envvar[0,0,0,0,0];
 
 void usage() {
-  cout << "./text-classifier --model-config <filename> [--port <port>] "
-          "[--threads <nthreads>] [--debug] [--grpc]\n\n"
-          "\t--grpc (-g)              use grpc service instead of rest\n"
-          "\t--port (-p)              port to use (default 9009)\n"
+  cout << "./text-classifier [--threads <nthreads>] [--port <port>] [--grpc]"
+          " [--debug] --model-config <filename>\n\n"
           "\t--threads (-t)           number of threads (default 1)\n"
+          "\t--port (-p)              port to use (default 9009)\n"
+          "\t--grpc (-g)              use grpc service instead of rest\n"
+          "\t--debug (-d)             debug mode (default false)\n"
           "\t--model-config (-f)      config file in which all models are "
           "described (needed)\n"
-          "\t--debug (-d)             debug mode (default false)\n"
           "\t--help (-h)              Show this message\n"
        << endl;
   exit(1);
@@ -45,24 +46,44 @@ void ProcessArgs(int argc, char **argv) {
       break;
 
     switch (opt) {
-    case 'p':
-      num_port = atoi(optarg);
-      break;
-
     case 't':
+      if (set_envvar[0]==1)
+      {
+          cout << "[INFO]\t" << currentDateTime() << "\tErasing previous value of threads ("<< threads <<"), given by environment variable, with "<< optarg << endl;
+      }
       threads = atoi(optarg);
       break;
 
+    case 'p':
+      if (set_envvar[1]==1)
+      {
+          cout << "[INFO]\t" << currentDateTime() << "\tErasing previous value of port ("<< num_port <<"), given by environment variable, with " << optarg << endl;
+      }
+      num_port = atoi(optarg);
+      break;
+
+    case 'g':
+      if (set_envvar[2]==1)
+      {
+          cout << "[INFO]\t" << currentDateTime() << "\tErasing previous value of gRPC ("<< server_type <<"), given by environment variable, with " << optarg << endl;
+      }
+      server_type = 1;
+      break;
+
     case 'd':
+      if (set_envvar[3]==1)
+      {
+          cout << "[INFO]\t" << currentDateTime() << "\tErasing previous value of debug ("<< debug <<"), given by environment variable, with " << optarg << endl;
+      }
       debug = 1;
       break;
 
     case 'f':
+      if (set_envvar[4]==1)
+      {
+          cout << "[INFO]\t" << currentDateTime() << "\tErasing previous value of config filename ("<< model_config <<"), given by environment variable, with " << optarg << endl;
+      }
       model_config = optarg;
-      break;
-
-    case 'g':
-      server_type = 1;
       break;
 
     case 'h': // -h or --help
@@ -80,11 +101,36 @@ void ProcessArgs(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-  if (getenv("API_TC_THREADS") != NULL) { threads=atoi(getenv("API_TC_THREADS")); }
-  if (getenv("API_TC_PORT") != NULL) { num_port=atoi(getenv("API_TC_PORT")); }
-  if (getenv("API_TC_GRPC") != NULL) { server_type = atoi(getenv("API_TC_GRPC")); }
-  if (getenv("API_TC_DEBUG") != NULL) { server_type = atoi(getenv("API_TC_DEBUG")); }
-  if (getenv("API_TC_CONFIG") != NULL) { model_config=getenv("API_TC_CONFIG"); }
+  if (getenv("API_TC_THREADS") != NULL) 
+  { 
+      threads=atoi(getenv("API_TC_THREADS")); 
+      set_envvar[0]=1; 
+      cout << "[INFO]\t" << currentDateTime() << "\tSetting the threads value to "<< threads <<", given by environment variable." << endl;
+  }
+  if (getenv("API_TC_PORT") != NULL) 
+  { 
+      num_port=atoi(getenv("API_TC_PORT")); 
+      set_envvar[1]=1; 
+      cout << "[INFO]\t" << currentDateTime() << "\tSetting the port value to "<< num_port <<", given by environment variable." << endl;
+  }
+  if (getenv("API_TC_GRPC") != NULL) 
+  { 
+      server_type = atoi(getenv("API_TC_GRPC")); 
+      set_envvar[2]=1; 
+      cout << "[INFO]\t" << currentDateTime() << "\tSetting the gRPC value to "<< server_type <<", given by environment variable." << endl;
+  }
+  if (getenv("API_TC_DEBUG") != NULL) 
+  { 
+      debug = atoi(getenv("API_TC_DEBUG")); 
+      set_envvar[3]=1; 
+      cout << "[INFO]\t" << currentDateTime() << "\tSetting the debug value to "<< debug <<", given by environment variable." << endl;
+  }
+  if (getenv("API_TC_CONFIG") != NULL) 
+  { 
+      model_config=getenv("API_TC_CONFIG"); 
+      set_envvar[4]=1; 
+      cout << "[INFO]\t" << currentDateTime() << "\tSetting the config filename value to "<< model_config <<", given by environment variable." << endl;
+  }
 
   ProcessArgs(argc, argv);
 
