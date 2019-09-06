@@ -15,7 +15,7 @@ int threads = 1;
 int debug = 0;
 std::string model_config("");
 int server_type = 0; // 0 -> REST, 1 -> GRPC
-bool* set_envvar[0,0,0,0,0];
+bool set_envvar[5]={0,0,0,0,0};
 
 void usage() {
   cout << "./text-classifier [--threads <nthreads>] [--port <port>] [--grpc]"
