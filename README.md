@@ -13,14 +13,22 @@ docker build -t text-classifier:latest .
 
 ## Launch the API
 ```
-./text-classifier --model-config <filename> [--port <port>] [--threads <nthreads>] [--debug]
+./text-classifier --model-config <filename> [--port <port>] [--threads <nthreads>] [--debug] [--grpc]
 
 --model-config (-f)      config file in which all models are described (REQUIRED)
 --port (-p)              port to use (default 9009)
 --threads (-t)           number of threads (default 1)
 --debug (-d)             debug mode (default false)
+--grpc (-g)              use grpc service instead of rest
 --help (-h)              show this message
 ```
+
+You can also use environment variable to configure the API:
+ * threads can be set with API_TC_THREADS
+ * port can be set with API_TC_PORT
+ * model-config can be set with API_TC_CONFIG
+ * grpc can be set with API_TC_GRPC
+ * debug can be set with API_TC_DEBUG
 
 ## Licencing
 
