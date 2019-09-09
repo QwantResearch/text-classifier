@@ -13,7 +13,7 @@ docker build -t text-classifier:latest .
 
 ## Launch the API
 ```
-./text-classifier --model-config <filename> [--port <port>] [--threads <nthreads>] [--debug]
+./text-classifier --model-config <filename> [--port <port>] [--threads <nthreads>] [--debug] [--grpc]
 
 --model-config (-f)      config file in which all models are described (REQUIRED)
 --port (-p)              port to use (default 9009)
