@@ -1,0 +1,6 @@
+#  name of the model:
+#    filename: file localization
+#    language: language of the model (for tokenization)
+language_identification: 
+  filename: resources/lid.176.ftz
+  language: xx

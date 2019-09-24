@@ -1,6 +1,10 @@
+# Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
+
 FROM ubuntu:18.04
 
-LABEL maintainer="n.martin@qwantresearch.com"
+LABEL authors="Estelle Maudet, Pierre Jackman, Noël Martin, Christophe Servan"
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 
 ENV TZ=Europe/Paris
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -9,24 +13,30 @@ RUN apt-get -y update && \
     apt-get -y install \
         cmake \
         g++ \
-        libboost-locale-dev \
-        libboost-regex-dev
+        libboost-locale1.65-dev \
+        libboost-regex1.65-dev \
+        libyaml-cpp-dev \
+        git \
+        cmake \
+        build-essential \
+        autoconf \
+        libtool \
+        pkg-config\
+        clang \
+        libc++-dev \
+        golang \
+        libssl-dev \
+        libgflags-dev \
+        libgtest-dev
 
-COPY . /opt/qnlp
+COPY . /opt/text-classifier
 
-WORKDIR /opt/qnlp
+WORKDIR /opt/text-classifier
 
-RUN bash build-deps.sh fastText \
-                        qnlp-toolkit \
-                        pistache \
-                        json \
-        && mkdir -p build/ && cd build \
-        && cmake .. && make -j4 && make install \
-        && ldconfig
-
+RUN bash ./install.sh
 
 RUN groupadd -r qnlp && useradd --system -s /bin/bash -g qnlp qnlp
 
-USER qnlp
+USER qnlp 
 
-ENTRYPOINT ["/usr/local/bin/qclass_server"]
+ENTRYPOINT ["/usr/local/bin/text-classifier"]

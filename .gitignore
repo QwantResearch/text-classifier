@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# IDE
+.vscode/*
+
+# CMake
+build/*
+
+# Generated python
+grpc_classification_pb2*

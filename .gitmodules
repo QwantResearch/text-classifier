@@ -1,6 +1,3 @@
-[submodule "vendor/fastText"]
-	path = vendor/fastText
-	url = https://github.com/facebookresearch/fastText.git
 [submodule "vendor/qnlp-toolkit"]
 	path = vendor/qnlp-toolkit
 	url = https://github.com/QwantResearch/qnlp-toolkit.git
@@ -10,3 +7,6 @@
 [submodule "vendor/json"]
 	path = vendor/json
 	url = https://github.com/nlohmann/json.git
+[submodule "vendor/grpc"]
+	path = vendor/grpc
+	url = https://github.com/grpc/grpc
