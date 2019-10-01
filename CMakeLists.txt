@@ -90,4 +90,24 @@ set(LIBS
 
 target_link_libraries(${CLASS_EXECUTABLE_API} ${LIBS})
 
-install(TARGETS ${CLASS_EXECUTABLE_API} DESTINATION bin)
+### Boost Tests ####
+
+find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+
+add_executable(tests
+  tests/tests.cpp
+  tests/tests_classifier.cpp
+)
+
+add_library(text-classifier-project ${CLASS_SOURCE_API})
+
+target_link_libraries(text-classifier-project ${LIBS})
+target_link_libraries(tests text-classifier-project ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+# indicates the include paths
+target_include_directories(tests PRIVATE ${Boost_INCLUDE_DIRS})
+# indicates the shared library variant
+target_compile_definitions(tests PRIVATE "BOOST_TEST_DYN_LINK=1")
+
+### END Boost Tests ####
+
+install(TARGETS ${CLASS_EXECUTABLE_API} tests DESTINATION bin)
