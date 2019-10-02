@@ -92,6 +92,8 @@ target_link_libraries(${CLASS_EXECUTABLE_API} ${LIBS})
 
 ### Boost Tests ####
 
+enable_testing()
+
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 add_executable(tests
@@ -107,6 +109,10 @@ target_link_libraries(tests text-classifier-project ${Boost_UNIT_TEST_FRAMEWORK_
 target_include_directories(tests PRIVATE ${Boost_INCLUDE_DIRS})
 # indicates the shared library variant
 target_compile_definitions(tests PRIVATE "BOOST_TEST_DYN_LINK=1")
+
+# declares a test with our executable
+add_test(NAME tests COMMAND tests)
+
 
 ### END Boost Tests ####
 
