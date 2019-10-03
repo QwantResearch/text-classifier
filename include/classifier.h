@@ -9,20 +9,20 @@
 #include <fasttext/fasttext.h>
 #include "tokenizer.h"
 
-class classifier {
+class Classifier {
 public:
-  classifier(std::string &filename, std::string &domain, std::string &lang) : _domain(domain) {
+  Classifier(std::string& filename, std::string& domain, std::string& lang) : _domain(domain) {
     _model.loadModel(filename.c_str());
-    _tokenizer = unique_ptr<tokenizer>(new tokenizer(lang,true));
+    _tokenizer = unique_ptr<Tokenizer>(new Tokenizer(lang,true));
   }
   std::vector<std::pair<fasttext::real, std::string>>
-  prediction(std::__cxx11::string &text, std::__cxx11::string &tokenized, int count, float threshold=0.0);
-  std::string getDomain() { return _domain; }
+  Predict(std::__cxx11::string& text, std::__cxx11::string& tokenized, int count, float threshold=0.0);
+  std::string GetDomain() { return _domain; }
 
 private:
   std::string _domain;
   fasttext::FastText _model;
-  unique_ptr<tokenizer> _tokenizer;
+  unique_ptr<Tokenizer> _tokenizer;
 };
 
 #endif // __CLASSIFIER_H

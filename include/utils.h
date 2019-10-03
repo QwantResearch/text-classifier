@@ -17,15 +17,15 @@
 #include "classifier.h"
 
 
-void Split(const std::string &line, std::vector<std::string> &pieces,
+void Split(const std::string& line, std::vector<std::string>& pieces,
            const std::string del);
 
-void printCookies(const Pistache::Http::Request &req);
+void PrintCookies(const Pistache::Http::Request& req);
 
-const std::string currentDateTime();
+const std::string CurrentDateTime();
 
 namespace Generic {
-void handleReady(const Pistache::Rest::Request &req, Pistache::Http::ResponseWriter response);
+void HandleReady(const Pistache::Rest::Request& req, Pistache::Http::ResponseWriter response);
 } // namespace Generic
 
 #endif // __UTILS_H

@@ -10,18 +10,18 @@
 #include "qnlp/fr_tokenizer.h"
 #include "qnlp/tokenizer.h"
 
-class tokenizer {
+class Tokenizer {
 public:
-  tokenizer(std::string &lang, bool lowercase = true);
-  ~tokenizer(){delete(_tokenizer);};
-  void set_tokenizer(std::string &lang, bool lowercase = true);
+  Tokenizer(std::string& lang, bool lowercase = true);
+  ~Tokenizer(){delete(_tokenizer);};
+  void SetTokenizer(std::string& lang, bool lowercase = true);
 
-  std::vector<std::string> tokenize(std::string &input);
-  std::string tokenize_str(std::string &input);
+  std::vector<std::string> Tokenize(std::string& input);
+  std::string TokenizeStr(std::string& input);
 
 private:
   std::string _lang;
-  qnlp::Tokenizer *_tokenizer;
+  qnlp::Tokenizer* _tokenizer;
 };
 
 #endif // __TOKENIZER_H

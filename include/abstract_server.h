@@ -15,11 +15,11 @@ using namespace std;
 
 class AbstractServer {
 public:
-    AbstractServer(int num_port, string &classif_config, int debug_mode);
+    AbstractServer(int num_port, string& classif_config, int debug_mode);
     virtual ~AbstractServer() {}
-    virtual void init(size_t thr = 2) = 0;
-    virtual void start() = 0;
-    virtual void shutdown() = 0;
+    virtual void Init(size_t thr = 2) = 0;
+    virtual void Start() = 0;
+    virtual void Shutdown() = 0;
 
 protected:
   int _debug_mode;

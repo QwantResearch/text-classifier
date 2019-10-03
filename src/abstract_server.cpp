@@ -3,7 +3,7 @@
 
 #include "abstract_server.h"
 
-AbstractServer::AbstractServer(int num_port, string &classif_config, int debug_mode){
+AbstractServer::AbstractServer(int num_port, string& classif_config, int debug_mode){
   _num_port = num_port;
   _debug_mode = debug_mode;
 

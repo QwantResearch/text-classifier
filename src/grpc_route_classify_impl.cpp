@@ -7,11 +7,11 @@ grpc::Status GrpcRouteClassifyImpl::GetDomains(grpc::ServerContext* context,
                                                const Empty* request,
                                                Domains* response) {
 
-  for (auto& it: _classifier_controller->getListClassifs()) {
-    response->add_domains(it->getDomain());
+  for (auto& it: _classifier_controller->GetListClassifs()) {
+    response->add_domains(it->GetDomain());
   }
   if (_debug_mode)
-    cerr << "[DEBUG]: " << currentDateTime() << "\t" << "GetDomains" << endl;
+    cerr << "[DEBUG]: " << CurrentDateTime() << "\t" << "GetDomains" << endl;
   return grpc::Status::OK;
 }
 
@@ -20,7 +20,7 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
                                                TextClassified* response) {
 
   if (_debug_mode) {
-    cerr << "[DEBUG]: " << currentDateTime() << "\t" << "GetClassif";
+    cerr << "[DEBUG]: " << CurrentDateTime() << "\t" << "GetClassif";
     cerr << "\t" << request->text() << "\t";
   }
 
@@ -31,13 +31,13 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
   std::string tokenized;
 
   std::vector<std::pair<fasttext::real, std::string>> results;
-  results = _classifier_controller->askClassification(text, tokenized, domain, response->count(), response->threshold());
+  results = _classifier_controller->AskClassification(text, tokenized, domain, response->count(), response->threshold());
   response->set_tokenized(tokenized);
 
   if (_debug_mode)
     cerr << "Labels:";
   for (auto& it: results) {
-    Score *score = response->add_intention();
+    Score* score = response->add_intention();
     score->set_label(it.second);
     score->set_confidence(it.first);
     if (_debug_mode)
@@ -56,7 +56,7 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
   while (stream->Read(&request)) {
 
     if (_debug_mode) {
-      cerr << "[DEBUG]: " << currentDateTime() << "\t" << "StreamClassify";
+      cerr << "[DEBUG]: " << CurrentDateTime() << "\t" << "StreamClassify";
       cerr  << "\t" << request.text() << "\t";
     }
 
@@ -68,13 +68,13 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
     std::string tokenized;
 
     std::vector<std::pair<fasttext::real, std::string>> results;
-    results = _classifier_controller->askClassification(text, tokenized, domain, response.count(), response.threshold());
+    results = _classifier_controller->AskClassification(text, tokenized, domain, response.count(), response.threshold());
     response.set_tokenized(tokenized);
 
     if (_debug_mode)
       cerr << "Labels:";
     for (auto& it: results) {
-      Score *score = response.add_intention();
+      Score* score = response.add_intention();
       score->set_label(it.second);
       score->set_confidence(it.first);
       if (_debug_mode)
