@@ -13,18 +13,18 @@
 
 class ClassifierController {
 public:
-  ClassifierController(std::string &classif_config);
+  ClassifierController(std::string& classif_config);
   ~ClassifierController();
-  std::vector<classifier *> getListClassifs();
-  std::vector<std::pair<fasttext::real, std::string>> askClassification(std::string &text, 
-                                                                      std::string &tokenized,
-                                                                      std::string &domain,
+  std::vector<Classifier *> GetListClassifs();
+  std::vector<std::pair<fasttext::real, std::string>> AskClassification(std::string& text, 
+                                                                      std::string& tokenized,
+                                                                      std::string& domain,
                                                                       int count,
                                                                       float threshold);
 
 private:
-  std::vector<classifier *> _list_classifs;
-  void ProcessConfigFile(std::string &classif_config, std::vector<classifier *> &_list_classifs);
+  std::vector<Classifier *> _list_classifs;
+  void ProcessConfigFile(std::string& classif_config, std::vector<Classifier *>& list_classifs);
 };
 
 #endif // __CLASSIFIER_CONTROLLER_H

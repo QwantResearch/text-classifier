@@ -3,18 +3,18 @@
 
 #include "utils.h"
 
-void printCookies(const Pistache::Http::Request &req) {
+void PrintCookies(const Pistache::Http::Request &req) {
   auto cookies = req.cookies();
   const std::string indent(4, ' ');
 
   std::cout << "Cookies: [" << std::endl;
-  for (const auto &c : cookies) {
+  for (const auto& c : cookies) {
     std::cout << indent << c.name << " = " << c.value << std::endl;
   }
   std::cout << "]" << std::endl;
 }
 
-void Split(const std::string &line, std::vector<std::string> &pieces,
+void Split(const std::string& line, std::vector<std::string>& pieces,
            const std::string del) {
   size_t begin = 0;
   size_t pos = 0;
@@ -35,7 +35,7 @@ void Split(const std::string &line, std::vector<std::string> &pieces,
     pieces.push_back(token);
 }
 
-const std::string currentDateTime() {
+const std::string CurrentDateTime() {
   time_t now = time(0);
   struct tm tstruct;
   char buf[80];
@@ -48,7 +48,7 @@ const std::string currentDateTime() {
 }
 
 namespace Generic {
-void handleReady(const Pistache::Rest::Request &req, Pistache::Http::ResponseWriter response) {
+void HandleReady(const Pistache::Rest::Request& req, Pistache::Http::ResponseWriter response) {
   response.send(Pistache::Http::Code::Ok, "1");
 }
 } // namespace Generic

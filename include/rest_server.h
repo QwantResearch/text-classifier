@@ -23,44 +23,41 @@ using namespace std;
 using namespace nlohmann;
 using namespace Pistache;
 
-class rest_server : public AbstractServer {
+class RestServer : public AbstractServer {
 
 public:
   using AbstractServer::AbstractServer;
-  ~rest_server(){httpEndpoint->shutdown();}
-  void init(size_t thr = 2) override;
-  void start() override;
-  void shutdown() override;
+  ~RestServer(){_http_endpoint->shutdown();}
+  void Init(size_t thr = 2) override;
+  void Start() override;
+  void Shutdown() override;
 
 private:
-  std::shared_ptr<Http::Endpoint> httpEndpoint;
-  Rest::Router router;
-  typedef std::mutex Lock;
-  typedef std::lock_guard<Lock> Guard;
-  Lock nluLock;
+  std::shared_ptr<Http::Endpoint> _http_endpoint;
+  Rest::Router _router;
 
-  void setupRoutes();
+  void SetupRoutes();
 
-  void doClassificationGet(const Rest::Request &request,
+  void DoClassificationGet(const Rest::Request& request,
                            Http::ResponseWriter response);
 
-  void doClassificationPost(const Rest::Request &request,
+  void DoClassificationPost(const Rest::Request& request,
                             Http::ResponseWriter response);
 
-  void doClassificationBatchPost(const Rest::Request &request,
+  void DoClassificationBatchPost(const Rest::Request& request,
                                  Http::ResponseWriter response);
 
-  void fetchParamWithDefault(const json& j,
+  void FetchParamWithDefault(const json& j,
                               string& domain,
                               int& count,
                               float& threshold,
                               bool& debugmode);
 
-  bool process_localization(string &input, json &output);
+  bool Process_localization(string& input, json& output);
 
-  void writeLog(string text_to_log) {}
+  void WriteLog(string text_to_log) {}
 
-  void doAuth(const Rest::Request &request, Http::ResponseWriter response);
+  void DoAuth(const Rest::Request& request, Http::ResponseWriter response);
 };
 
 #endif // __REST_SERVER_H
