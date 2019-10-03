@@ -4,37 +4,37 @@
 #include "rest_server.h"
 #include "utils.h"
 
-void rest_server::init(size_t thr) {
+void RestServer::Init(size_t thr) {
   Pistache::Port port(_num_port);
   Address addr(Ipv4::any(), port);
-  httpEndpoint = std::make_shared<Http::Endpoint>(addr);
+  _http_endpoint = std::make_shared<Http::Endpoint>(addr);
 
   auto opts = Http::Endpoint::options().threads(thr).flags(
       Tcp::Options::InstallSignalHandler);
-  httpEndpoint->init(opts);
-  setupRoutes();
+  _http_endpoint->init(opts);
+  SetupRoutes();
 }
 
-void rest_server::start() {
-  httpEndpoint->setHandler(router.handler());
-  httpEndpoint->serve();
-  httpEndpoint->shutdown();
+void RestServer::Start() {
+  _http_endpoint->setHandler(_router.handler());
+  _http_endpoint->serve();
+  _http_endpoint->shutdown();
 }
 
-void rest_server::setupRoutes() {
+void RestServer::SetupRoutes() {
   using namespace Rest;
 
-  Routes::Post(router, "/intention/",
-               Routes::bind(&rest_server::doClassificationPost, this));
+  Routes::Post(_router, "/intention/",
+               Routes::bind(&RestServer::DoClassificationPost, this));
 
-  Routes::Post(router, "/intention_batch/",
-              Routes::bind(&rest_server::doClassificationBatchPost, this));
+  Routes::Post(_router, "/intention_batch/",
+              Routes::bind(&RestServer::DoClassificationBatchPost, this));
 
-  Routes::Get(router, "/intention/",
-              Routes::bind(&rest_server::doClassificationGet, this));
+  Routes::Get(_router, "/intention/",
+              Routes::bind(&RestServer::DoClassificationGet, this));
 }
 
-void rest_server::doClassificationGet(const Rest::Request &request,
+void RestServer::DoClassificationGet(const Rest::Request& request,
                                       Http::ResponseWriter response) {
   response.headers().add<Http::Header::AccessControlAllowHeaders>(
       "Content-Type");
@@ -45,21 +45,21 @@ void rest_server::doClassificationGet(const Rest::Request &request,
 
   bool first_domain = true;
   string response_string = "{\"domains\":[";
-  for (auto& it: _classifier_controller->getListClassifs()){
+  for (auto& it: _classifier_controller->GetListClassifs()){
     if (!first_domain)
       response_string.append(",");
     response_string.append("\"");
-    response_string.append(it->getDomain());
+    response_string.append(it->GetDomain());
     response_string.append("\"");
     first_domain = false;
   }
   response_string.append("]}");
   if (_debug_mode != 0)
-    cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << response_string << endl;
+    cerr << "[DEBUG]\t" << CurrentDateTime() << "\tRESPONSE\t" << response_string << endl;
   response.send(Pistache::Http::Code::Ok, response_string);
 }
 
-void rest_server::doClassificationPost(const Rest::Request &request,
+void RestServer::DoClassificationPost(const Rest::Request& request,
                                        Http::ResponseWriter response) {
   response.headers().add<Http::Header::AccessControlAllowHeaders>(
       "Content-Type");
@@ -74,7 +74,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
   string domain;
   
   try {
-    rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode);
+    RestServer::FetchParamWithDefault(j, domain, count, threshold, debugmode);
   } catch (std::runtime_error e) {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Bad_Request, e.what());
@@ -85,16 +85,16 @@ void rest_server::doClassificationPost(const Rest::Request &request,
     string text = j["text"];
     string tokenized;
     if (_debug_mode != 0)
-      cerr << "[DEBUG]\t" << currentDateTime() << "\t" << "ASK CLASS :\t" << j << endl;
+      cerr << "[DEBUG]\t" << CurrentDateTime() << "\t" << "ASK CLASS :\t" << j << endl;
     std::vector<std::pair<fasttext::real, std::string>> results;
-    results = _classifier_controller->askClassification(text, tokenized, domain, count, threshold);
+    results = _classifier_controller->AskClassification(text, tokenized, domain, count, threshold);
     if ((int)results.size() > 0)
     {
         if ((int)results[0].second.compare("DOMAIN ERROR")==0)
         {
             response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
             response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
-            cerr << "[ERROR]\t" << currentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
+            cerr << "[ERROR]\t" << CurrentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
             return;
         }
     }
@@ -102,7 +102,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
     j.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
     std::string s = j.dump();
     if (_debug_mode != 0)
-      cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << s << endl;
+      cerr << "[DEBUG]\t" << CurrentDateTime() << "\tRESPONSE\t" << s << endl;
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Ok, std::string(s));
   } else {
@@ -111,7 +111,7 @@ void rest_server::doClassificationPost(const Rest::Request &request,
   }
 }
 
-void rest_server::doClassificationBatchPost(const Rest::Request &request,
+void RestServer::DoClassificationBatchPost(const Rest::Request& request,
                                        Http::ResponseWriter response) {
   response.headers().add<Http::Header::AccessControlAllowHeaders>(
       "Content-Type");
@@ -126,7 +126,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
   string domain;
   
   try {
-    rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode);
+    RestServer::FetchParamWithDefault(j, domain, count, threshold, debugmode);
   } catch (std::runtime_error e) {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
     response.send(Http::Code::Bad_Request, e.what());
@@ -138,15 +138,15 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
         string text = it["text"];
         string tokenized;
         if (_debug_mode != 0)
-          cerr << "[DEBUG]\t" << currentDateTime() << "\tASK CLASS:\t" << it << endl;
-        auto results = _classifier_controller->askClassification(text, tokenized, domain, count, threshold);
+          cerr << "[DEBUG]\t" << CurrentDateTime() << "\tASK CLASS:\t" << it << endl;
+        auto results = _classifier_controller->AskClassification(text, tokenized, domain, count, threshold);
         if ((int)results.size() > 0)
         {
             if ((int)results[0].second.compare("DOMAIN ERROR")==0)
             {
                 response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
                 response.send(Http::Code::Bad_Request,std::string("`domain` value is not valid ("+domain+")"));
-                cerr << "[ERROR]\t" << currentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
+                cerr << "[ERROR]\t" << CurrentDateTime() << "\tRESPONSE\t" << "`domain` value is not valid ("+domain+")\t" << j << endl;
                 return;
             }
         }
@@ -163,7 +163,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
     }
     std::string s = j.dump();
     if (_debug_mode != 0)
-      cerr << "[DEBUG]\t" << currentDateTime() << "\tRESULT CLASS:\t" << s << endl;
+      cerr << "[DEBUG]\t" << CurrentDateTime() << "\tRESULT CLASS:\t" << s << endl;
     response.headers().add<Http::Header::ContentType>(
         MIME(Application, Json));
     response.send(Http::Code::Ok, std::string(s));
@@ -174,7 +174,7 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
   }
 }
 
-void rest_server::fetchParamWithDefault(const nlohmann::json& j, 
+void RestServer::FetchParamWithDefault(const nlohmann::json& j, 
                             string& domain, 
                             int& count,
                             float& threshold,
@@ -199,13 +199,13 @@ void rest_server::fetchParamWithDefault(const nlohmann::json& j,
   }
 }
 
-void rest_server::doAuth(const Rest::Request &request,
+void RestServer::DoAuth(const Rest::Request& request,
                          Http::ResponseWriter response) {
-  printCookies(request);
+  PrintCookies(request);
   response.cookies().add(Http::Cookie("lang", "fr-FR"));
   response.send(Http::Code::Ok);
 }
 
-void rest_server::shutdown() {
-  httpEndpoint->shutdown(); 
+void RestServer::Shutdown() {
+  _http_endpoint->shutdown(); 
 }

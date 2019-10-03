@@ -3,11 +3,11 @@
 
 #include "tokenizer.h"
 
-tokenizer::tokenizer(std::string &lang, bool lowercase) {
-  this->set_tokenizer(lang, lowercase);
+Tokenizer::Tokenizer(std::string& lang, bool lowercase) {
+  this->SetTokenizer(lang, lowercase);
 }
 
-void tokenizer::set_tokenizer(std::string &lang, bool lowercase) {
+void Tokenizer::SetTokenizer(std::string& lang, bool lowercase) {
   _lang = lang;
 
   if (_lang == "fr") {
@@ -22,10 +22,10 @@ void tokenizer::set_tokenizer(std::string &lang, bool lowercase) {
   }
 }
 
-std::vector<std::string> tokenizer::tokenize(std::string &input) {
+std::vector<std::string> Tokenizer::Tokenize(std::string& input) {
   return _tokenizer->tokenize_sentence(input);
 }
 
-std::string tokenizer::tokenize_str(std::string &input) {
+std::string Tokenizer::TokenizeStr(std::string& input) {
   return _tokenizer->tokenize_sentence_to_string(input);
 }

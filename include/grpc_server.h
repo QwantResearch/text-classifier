@@ -26,17 +26,17 @@ using namespace std;
 using namespace nlohmann;
 
 
-class grpc_server : public AbstractServer {//, public RouteClassify::Service {
+class GrpcServer : public AbstractServer {//, public RouteClassify::Service {
 
 public:
     using AbstractServer::AbstractServer;
-    ~grpc_server() {delete _service;}
-    void init(size_t thr = 2) override;
-    void start() override;
-    void shutdown() override;
+    ~GrpcServer() {delete _service;}
+    void Init(size_t thr = 2) override;
+    void Start() override;
+    void Shutdown() override;
 
 private:
-    GrpcRouteClassifyImpl *_service;
+    GrpcRouteClassifyImpl* _service;
 };
 
 #endif // __GRPC_SERVER_H
