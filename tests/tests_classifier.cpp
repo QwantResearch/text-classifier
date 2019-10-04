@@ -96,16 +96,15 @@ BOOST_AUTO_TEST_CASE( classifier_tokenization_test )
     // Test en tokenizer
     lang = "en";
     classifier = unique_ptr<Classifier>(new Classifier(filename, domain, lang));
-    text = "Hello, I don't like my name, Jonas.";
+    text = "My name's Bond. James Bond.";
     classifier->Predict(text, tokenized, 1);
-    BOOST_TEST(tokenized == "hello , i do n't like my name , jonas .\n");
+    BOOST_TEST(tokenized == "my name 's bond . james bond .\n");
 
-    // Test general tokenizer
-    lang = ""; // any lang that is not supported is treated as fr
+    // Test default tokenizer
+    lang = ""; // same for any language that is not supported
     classifier = unique_ptr<Classifier>(new Classifier(filename, domain, lang));
-    text = "Hello, I don't like my name, Jonas.";
     classifier->Predict(text, tokenized, 1);
-    BOOST_TEST(tokenized == "hello , i don ' t like my name , jonas .\n");
+    BOOST_TEST(tokenized == "my name ' s bond . james bond .\n");
 
     // Test empty text tokenizer
     lang = "";
