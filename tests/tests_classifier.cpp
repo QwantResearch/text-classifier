@@ -11,22 +11,19 @@ BOOST_AUTO_TEST_CASE( classifier_load_model_test )
 
     // Failed model loading because of file not found
     filename = "filename";
-    try {
-        classifier = new Classifier(filename, domain, lang);
-    } catch(const std::invalid_argument &e) {
-        BOOST_TEST(e.what() == filename + " cannot be opened for loading!");
-    }
-    BOOST_TEST(classifier == nullptr);
+    auto IsNotFoundMessage = [&](std::invalid_argument exception){
+        BOOST_CHECK_EQUAL(exception.what(), filename + " cannot be opened for loading!");
+        return true;
+    };
+    BOOST_CHECK_EXCEPTION(Classifier(filename, domain, lang), std::invalid_argument, IsNotFoundMessage);
 
     // Failed model loading because of invalid format
     filename = "/opt/text-classifier/models_config.yaml";
-    classifier = nullptr;
-    try {
-        classifier = new Classifier(filename, domain, lang);
-    } catch(const std::invalid_argument &e) {
-        BOOST_TEST(e.what() == filename + " has wrong file format!");
-    }
-    BOOST_TEST(classifier == nullptr);
+    auto IsWrongFormatMessage = [&](std::invalid_argument exception){
+        BOOST_CHECK_EQUAL(exception.what(), filename + " has wrong file format!");
+        return true;
+    };
+    BOOST_CHECK_EXCEPTION(Classifier(filename, domain, lang), std::invalid_argument, IsWrongFormatMessage);
 
     // Loaded model successfully
     filename = "/opt/text-classifier/resources/lid.176.ftz";
