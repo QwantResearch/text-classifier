@@ -100,6 +100,7 @@ add_executable(tests
   tests/tests.cpp
   tests/tests_classifier.cpp
   tests/tests_tokenizer.cpp
+  tests/tests_classifier_controller.cpp
 )
 
 add_library(text-classifier-project ${CLASS_SOURCE_API})
