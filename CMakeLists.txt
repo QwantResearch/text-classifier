@@ -101,6 +101,7 @@ add_executable(tests
   tests/tests_classifier.cpp
   tests/tests_tokenizer.cpp
   tests/tests_classifier_controller.cpp
+  tests/tests_grpc_route_classify_impl.cpp
 )
 
 add_library(text-classifier-project ${CLASS_SOURCE_API})

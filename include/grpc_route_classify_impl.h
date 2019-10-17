@@ -18,7 +18,6 @@ class GrpcRouteClassifyImpl : public RouteClassify::Service {
 public:
     GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller, int debug_mode);
     ~GrpcRouteClassifyImpl() {};
-private:
     grpc::Status GetDomains(grpc::ServerContext* context,
                             const Empty* request,
                             Domains* response) override;
@@ -28,6 +27,7 @@ private:
     grpc::Status StreamClassify(grpc::ServerContext* context,
                                 grpc::ServerReaderWriter< TextClassified, TextToClassify>* stream) override;
 
+private:
     void PrepareOutput(const TextToClassify* request, TextClassified* response);
 
     shared_ptr<ClassifierController> _classifier_controller;

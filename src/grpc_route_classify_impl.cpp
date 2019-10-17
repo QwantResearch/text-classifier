@@ -33,7 +33,10 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
   std::vector<std::pair<fasttext::real, std::string>> results;
   results = _classifier_controller->AskClassification(text, tokenized, domain, response->count(), response->threshold());
   response->set_tokenized(tokenized);
-
+  
+  if (results.size() == 1 && results.at(0).second == "DOMAIN ERROR"){
+    return grpc::Status(grpc::StatusCode::NOT_FOUND, "domain not found");
+  }
   if (_debug_mode)
     cerr << "Labels:";
   for (auto& it: results) {
@@ -70,6 +73,10 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
     std::vector<std::pair<fasttext::real, std::string>> results;
     results = _classifier_controller->AskClassification(text, tokenized, domain, response.count(), response.threshold());
     response.set_tokenized(tokenized);
+
+    if (results.size() == 1 && results.at(0).second == "DOMAIN ERROR"){
+      return grpc::Status(grpc::StatusCode::NOT_FOUND, "domain not found");
+    }
 
     if (_debug_mode)
       cerr << "Labels:";
