@@ -9,8 +9,7 @@ void RestServer::Init(size_t thr) {
   Address addr(Ipv4::any(), port);
   _http_endpoint = std::make_shared<Http::Endpoint>(addr);
 
-  auto opts = Http::Endpoint::options().threads(thr).flags(
-      Tcp::Options::InstallSignalHandler);
+  auto opts = Http::Endpoint::options().threads(thr);
   _http_endpoint->init(opts);
   SetupRoutes();
 }
