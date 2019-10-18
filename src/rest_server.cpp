@@ -7,7 +7,7 @@
 void RestServer::Init(size_t thr) {
   Pistache::Port port(_num_port);
   Address addr(Ipv4::any(), port);
-  _http_endpoint = std::make_shared<Http::Endpoint>(addr);
+  _http_endpoint = std::unique_ptr<Http::Endpoint>(new Http::Endpoint(addr));
 
   auto opts = Http::Endpoint::options().threads(thr);
   _http_endpoint->init(opts);
@@ -17,7 +17,11 @@ void RestServer::Init(size_t thr) {
 void RestServer::Start() {
   _http_endpoint->setHandler(_router.handler());
   _http_endpoint->serve();
-  _http_endpoint->shutdown();
+}
+
+void RestServer::StartThreaded() {
+  _http_endpoint->setHandler(_router.handler());
+  _http_endpoint->serveThreaded();
 }
 
 void RestServer::SetupRoutes() {

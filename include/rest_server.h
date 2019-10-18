@@ -27,13 +27,14 @@ class RestServer : public AbstractServer {
 
 public:
   using AbstractServer::AbstractServer;
-  ~RestServer(){_http_endpoint->shutdown();}
+  ~RestServer(){}
   void Init(size_t thr = 2) override;
   void Start() override;
+  void StartThreaded();
   void Shutdown() override;
 
 private:
-  std::shared_ptr<Http::Endpoint> _http_endpoint;
+  std::unique_ptr<Http::Endpoint> _http_endpoint;
   Rest::Router _router;
 
   void SetupRoutes();

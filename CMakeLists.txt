@@ -52,7 +52,7 @@ add_custom_command(
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 ### END GRPC ###
 
-include_directories(${PROJECT_SOURCE_DIR}/include/ /usr/local/include/ /usr/)
+include_directories(${PROJECT_SOURCE_DIR}/include/ /usr/local/include/ /usr/ ${PROJECT_SOURCE_DIR}/tests/)
 
 link_directories(/usr/local/lib/ /usr/lib/)
 
@@ -102,6 +102,7 @@ add_executable(tests
   tests/tests_tokenizer.cpp
   tests/tests_classifier_controller.cpp
   tests/tests_grpc_route_classify_impl.cpp
+  tests/tests_rest_server.cpp
 )
 
 add_library(text-classifier-project ${CLASS_SOURCE_API})
