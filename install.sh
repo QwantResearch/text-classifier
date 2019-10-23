@@ -2,6 +2,7 @@
 # Copyright 2019 Qwant Research. Licensed under the terms of the Apache 2.0
 # license. See LICENSE in the project root.
 
+set -eou pipefail
 
 export PREFIX=/usr/local/
 
@@ -9,20 +10,16 @@ echo "Prefix set to $PREFIX"
 
 export CMAKE_PREFIX_PATH=$PREFIX
 
-git submodule update --init --recursive
-
 echo "Installing dependencies"
 
 pushd vendor/qnlp-toolkit
 	rm -rf build
-	git pull  --recurse-submodules 
 	bash install.sh $PREFIX
 popd
- 
+
 for dep in pistache json
 do
 pushd vendor/$dep
-	#git submodule update --init
 	rm -rf build
 	mkdir -p build
 	pushd build
@@ -33,7 +30,6 @@ popd
 done
 
 pushd vendor/grpc
-	git submodule update --init
 
 	# Based on https://github.com/grpc/grpc/blob/master/test/distrib/cpp/run_distrib_test_cmake.sh
 
