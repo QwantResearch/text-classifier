@@ -19,7 +19,7 @@ void ClassifierController::ProcessConfigFile(std::string& classif_config,
     config = YAML::LoadFile(classif_config);
   } catch (YAML::BadFile& bf) {
     std::cerr << "[ERROR] " << bf.what() << std::endl;
-    exit(1);
+    throw;
   }
 
   for (const auto& modelnode : config){
@@ -66,6 +66,7 @@ ClassifierController::AskClassification(std::string& text, std::string& tokenize
       } else {
           to_return.push_back(std::pair<fasttext::real, std::string>(0.0,"DOMAIN ERROR"));
           // TODO: Deal with DOMAIN ERROR in GRPC
+          // TODO: throw an exception instead?
       }
   }
   return to_return;

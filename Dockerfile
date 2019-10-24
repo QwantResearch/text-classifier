@@ -15,6 +15,8 @@ RUN apt-get -y update && \
         g++ \
         libboost-locale1.65-dev \
         libboost-regex1.65-dev \
+        libboost-test1.65.1 \
+        libboost-test-dev \
         libyaml-cpp-dev \
         git \
         cmake \

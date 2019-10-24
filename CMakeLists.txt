@@ -52,7 +52,7 @@ add_custom_command(
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 ### END GRPC ###
 
-include_directories(${PROJECT_SOURCE_DIR}/include/ /usr/local/include/ /usr/)
+include_directories(${PROJECT_SOURCE_DIR}/include/ /usr/local/include/ /usr/ ${PROJECT_SOURCE_DIR}/tests/)
 
 link_directories(/usr/local/lib/ /usr/lib/)
 
@@ -90,4 +90,34 @@ set(LIBS
 
 target_link_libraries(${CLASS_EXECUTABLE_API} ${LIBS})
 
-install(TARGETS ${CLASS_EXECUTABLE_API} DESTINATION bin)
+### Boost Tests ####
+
+enable_testing()
+
+find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+
+add_executable(tests
+  tests/tests.cpp
+  tests/tests_classifier.cpp
+  tests/tests_tokenizer.cpp
+  tests/tests_classifier_controller.cpp
+  tests/tests_grpc_route_classify_impl.cpp
+  tests/tests_rest_server.cpp
+)
+
+add_library(text-classifier-project ${CLASS_SOURCE_API})
+
+target_link_libraries(text-classifier-project ${LIBS})
+target_link_libraries(tests text-classifier-project ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+# indicates the include paths
+target_include_directories(tests PRIVATE ${Boost_INCLUDE_DIRS})
+# indicates the shared library variant
+target_compile_definitions(tests PRIVATE "BOOST_TEST_DYN_LINK=1")
+
+# declares a test with our executable
+add_test(NAME tests COMMAND tests)
+
+
+### END Boost Tests ####
+
+install(TARGETS ${CLASS_EXECUTABLE_API} tests DESTINATION bin)

@@ -1,0 +1,3 @@
+language_identification: 
+  filename: /opt/text-classifier/resources/lid.176.ftz
+  language: xx
