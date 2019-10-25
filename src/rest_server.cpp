@@ -213,6 +213,17 @@ void RestServer::GetStatus(const Rest::Request& request,
       "GET, POST, DELETE, OPTIONS");
   response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
   response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+
+  std::string text("text");
+  std::string tokenized, domain;
+  std::vector<std::pair<fasttext::real, std::string>> results;
+
+  for (auto& it: _classifier_controller->GetListClassifs()){
+    domain = it->GetDomain();
+    results = _classifier_controller->AskClassification(text, tokenized, domain, 1, 0.0);
+    if (results.size() == 0 || (int)results[0].second.compare("DOMAIN ERROR")==0)
+      response.send(Pistache::Http::Code::Internal_Server_Error);
+  }
   response.send(Pistache::Http::Code::Ok);
 }
 
