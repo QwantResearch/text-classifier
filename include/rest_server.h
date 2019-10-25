@@ -48,6 +48,9 @@ private:
   void DoClassificationBatchPost(const Rest::Request& request,
                                  Http::ResponseWriter response);
 
+  void GetStatus(const Rest::Request& request,
+                 Http::ResponseWriter response);
+
   void FetchParamWithDefault(const json& j,
                               string& domain,
                               int& count,

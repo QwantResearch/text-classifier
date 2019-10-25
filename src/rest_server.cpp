@@ -35,6 +35,9 @@ void RestServer::SetupRoutes() {
 
   Routes::Get(_router, "/intention/",
               Routes::bind(&RestServer::DoClassificationGet, this));
+
+  Routes::Get(_router, "/status/",
+              Routes::bind(&RestServer::GetStatus, this));
 }
 
 void RestServer::DoClassificationGet(const Rest::Request& request,
@@ -200,6 +203,17 @@ void RestServer::FetchParamWithDefault(const nlohmann::json& j,
   } else {
     throw std::runtime_error("`domain` value is null");
   }
+}
+
+void RestServer::GetStatus(const Rest::Request& request,
+                           Http::ResponseWriter response) {
+  response.headers().add<Http::Header::AccessControlAllowHeaders>(
+      "Content-Type");
+  response.headers().add<Http::Header::AccessControlAllowMethods>(
+      "GET, POST, DELETE, OPTIONS");
+  response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
+  response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+  response.send(Pistache::Http::Code::Ok);
 }
 
 void RestServer::DoAuth(const Rest::Request& request,
