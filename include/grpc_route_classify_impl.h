@@ -14,6 +14,8 @@
 #include "abstract_server.h"
 #include "utils.h"
 
+using namespace textclassifier;
+
 class GrpcRouteClassifyImpl : public RouteClassify::Service {
 public:
     GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller, int debug_mode);
