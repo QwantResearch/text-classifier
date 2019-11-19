@@ -108,4 +108,5 @@ void GrpcRouteClassifyImpl::PrepareOutput(const TextToClassify* request, TextCla
 GrpcRouteClassifyImpl::GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller, int debug_mode) {
   _classifier_controller = classifier_controller;
   _debug_mode = debug_mode;
+  grpc::EnableDefaultHealthCheckService(true);
 }

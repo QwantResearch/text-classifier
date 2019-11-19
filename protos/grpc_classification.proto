@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package textclassifier;
+
 service RouteClassify {
     rpc GetDomains(Empty) returns (Domains) {}
     rpc GetClassif(TextToClassify) returns (TextClassified) {}
