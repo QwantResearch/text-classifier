@@ -45,11 +45,34 @@ BOOST_AUTO_TEST_CASE( grpc_route_classify_impl_get_classif_test )
 
 
     TextToClassify* request_get_classif = new TextToClassify();
-    request_get_classif->set_text(std::string("Bonjour, je m'appelle Henry."));
     TextClassified response_get_classif;
 
+    // Test failure because of text missing
+    status = grpc_route_classify_impl.GetClassif(context, request_get_classif, &response_get_classif);
+    BOOST_TEST(status.error_code() == grpc::StatusCode::INVALID_ARGUMENT);
+    BOOST_TEST(status.error_message() == "text value must be set");
+
+
+    request_get_classif->set_text(std::string("Bonjour, je m'appelle Henry."));
+
+    // Test failure because of domain missing
+    status = grpc_route_classify_impl.GetClassif(context, request_get_classif, &response_get_classif);
+    BOOST_TEST(status.error_code() == grpc::StatusCode::INVALID_ARGUMENT);
+    BOOST_TEST(status.error_message() == "domain value must be set");
+
+    // Test failure because of count value missing or == 0
+    request_get_classif->set_domain(std::string("fake_domain"));
+    status = grpc_route_classify_impl.GetClassif(context, request_get_classif, &response_get_classif);
+    BOOST_TEST(status.error_code() == grpc::StatusCode::INVALID_ARGUMENT);
+    BOOST_TEST(status.error_message() == "count value must be set and >= 1");
+    
+    request_get_classif->set_count(0);status = grpc_route_classify_impl.GetClassif(context, request_get_classif, &response_get_classif);
+    BOOST_TEST(status.error_code() == grpc::StatusCode::INVALID_ARGUMENT);
+    BOOST_TEST(status.error_message() == "count value must be set and >= 1");
+
     // Test failure because of domain not found
-    request_get_classif->set_domain(std::string(""));
+    request_get_classif->set_domain(std::string("fake_domain"));
+    request_get_classif->set_count(1);
     status = grpc_route_classify_impl.GetClassif(context, request_get_classif, &response_get_classif);
     BOOST_TEST(status.error_code() == grpc::StatusCode::NOT_FOUND);
     BOOST_TEST(status.error_message() == "domain not found");

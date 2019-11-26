@@ -24,7 +24,10 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
     cerr << "\t" << request->text() << "\t";
   }
 
-  PrepareOutput(request, response);
+  grpc::Status status = ParseInput(request, response);
+  if (!status.ok()) {
+    return status;
+  }
 
   std::string text = response->text();
   std::string domain = response->domain();
@@ -64,7 +67,10 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
     }
 
     TextClassified response;
-    PrepareOutput(&request, &response);
+    grpc::Status status = ParseInput(&request, &response);
+    if (!status.ok()) {
+      return status;
+    }
 
     std::string text = response.text();
     std::string domain = response.domain();
@@ -96,13 +102,20 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
   return grpc::Status::OK;
 }
 
-void GrpcRouteClassifyImpl::PrepareOutput(const TextToClassify* request, TextClassified* response) {
-  std::string text = request->text();
-
+grpc::Status GrpcRouteClassifyImpl::ParseInput(const TextToClassify* request, TextClassified* response) {
+  if (request->text() == "")
+    return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "text value must be set");
+  if (request->domain() == "")
+    return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "domain value must be set");
+  if (request->count() <= 0)
+    return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "count value must be set and >= 1");
+  
   response->set_text(request->text());
   response->set_domain(request->domain());
   response->set_count(request->count());
   response->set_threshold(request->threshold());
+
+  return grpc::Status::OK;
 }
 
 GrpcRouteClassifyImpl::GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller, int debug_mode) {

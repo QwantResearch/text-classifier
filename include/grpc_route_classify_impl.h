@@ -30,7 +30,7 @@ public:
                                 grpc::ServerReaderWriter< TextClassified, TextToClassify>* stream) override;
 
 private:
-    void PrepareOutput(const TextToClassify* request, TextClassified* response);
+    grpc::Status ParseInput(const TextToClassify* request, TextClassified* response);
 
     shared_ptr<ClassifierController> _classifier_controller;
     int _debug_mode;
