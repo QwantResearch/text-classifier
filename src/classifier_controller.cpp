@@ -56,18 +56,16 @@ std::vector<std::pair<fasttext::real, std::string>>
 ClassifierController::AskClassification(std::string& text, std::string& tokenized, std::string& domain,
                                int count, float threshold) {
   std::vector<std::pair<fasttext::real, std::string>> to_return;
-  if ((int)text.size() > 0) {
-      auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(),
-      [&](Classifier* l_classif) {
-                                        return l_classif->GetDomain() == domain;
-                                    });
-      if (it_classif != _list_classifs.end()) {
-          to_return = (*it_classif)->Predict(text, tokenized, count, threshold);
-      } else {
-          to_return.push_back(std::pair<fasttext::real, std::string>(0.0,"DOMAIN ERROR"));
-          // TODO: Deal with DOMAIN ERROR in GRPC
-          // TODO: throw an exception instead?
-      }
+  auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(),
+  [&](Classifier* l_classif) {
+                                    return l_classif->GetDomain() == domain;
+                                });
+  if (it_classif != _list_classifs.end()) {
+      to_return = (*it_classif)->Predict(text, tokenized, count, threshold);
+  } else {
+      to_return.push_back(std::pair<fasttext::real, std::string>(0.0,"DOMAIN ERROR"));
+      // TODO: Deal with DOMAIN ERROR in GRPC
+      // TODO: throw an exception instead?
   }
   return to_return;
 }

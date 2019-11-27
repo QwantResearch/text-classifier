@@ -103,8 +103,6 @@ grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
 }
 
 grpc::Status GrpcRouteClassifyImpl::ParseInput(const TextToClassify* request, TextClassified* response) {
-  if (request->text() == "")
-    return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "text value must be set");
   if (request->domain() == "")
     return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "domain value must be set");
   if (request->count() <= 0)

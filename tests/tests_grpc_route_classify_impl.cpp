@@ -47,12 +47,6 @@ BOOST_AUTO_TEST_CASE( grpc_route_classify_impl_get_classif_test )
     TextToClassify* request_get_classif = new TextToClassify();
     TextClassified response_get_classif;
 
-    // Test failure because of text missing
-    status = grpc_route_classify_impl.GetClassif(context, request_get_classif, &response_get_classif);
-    BOOST_TEST(status.error_code() == grpc::StatusCode::INVALID_ARGUMENT);
-    BOOST_TEST(status.error_message() == "text value must be set");
-
-
     request_get_classif->set_text(std::string("Bonjour, je m'appelle Henry."));
 
     // Test failure because of domain missing
