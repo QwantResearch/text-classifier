@@ -19,38 +19,42 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
                                                const TextToClassify* request,
                                                TextClassified* response) {
 
-  if (_debug_mode) {
-    cerr << "[DEBUG]: " << CurrentDateTime() << "\t" << "GetClassif";
-    cerr << "\t" << request->text() << "\t";
-  }
+  // if (_debug_mode) {
+  //   cerr << "[DEBUG]: " << CurrentDateTime() << "\t" << "GetClassif";
+  //   cerr << "\t" << request->text() << "\t";
+  // }
 
-  grpc::Status status = ParseInput(request, response);
-  if (!status.ok()) {
-    return status;
-  }
+  // grpc::Status status = ParseInput(request, response);
+  // if (!status.ok()) {
+  //   return status;
+  // }
 
-  std::string text = response->text();
-  std::string domain = response->domain();
-  std::string tokenized;
+  // std::string text = response->text();
+  // std::string domain = response->domain();
+  // std::string tokenized;
 
-  std::vector<std::pair<fasttext::real, std::string>> results;
-  results = _classifier_controller->AskClassification(text, tokenized, domain, response->count(), response->threshold());
-  response->set_tokenized(tokenized);
+  // std::vector<std::pair<fasttext::real, std::string>> results;
+  // results = _classifier_controller->AskClassification(text, tokenized, domain, response->count(), response->threshold());
+  // response->set_tokenized(tokenized);
   
-  if (results.size() == 1 && results.at(0).second == "DOMAIN ERROR"){
-    return grpc::Status(grpc::StatusCode::NOT_FOUND, "domain not found");
-  }
-  if (_debug_mode)
-    cerr << "Labels:";
-  for (auto& it: results) {
-    Score* score = response->add_intention();
-    score->set_label(it.second);
-    score->set_confidence(it.first);
-    if (_debug_mode)
-      cerr << " (" << score->label() << ", " << score->confidence() << ")";
-  }
-  if (_debug_mode)
-    cerr << endl;
+  // if (results.size() == 1 && results.at(0).second == "DOMAIN ERROR"){
+  //   return grpc::Status(grpc::StatusCode::NOT_FOUND, "domain not found");
+  // }
+  // if (_debug_mode)
+  //   cerr << "Labels:";
+  // for (auto& it: results) {
+  //   Score* score = response->add_intention();
+  //   score->set_label(it.second);
+  //   score->set_confidence(it.first);
+  //   if (_debug_mode)
+  //     cerr << " (" << score->label() << ", " << score->confidence() << ")";
+  // }
+  // if (_debug_mode)
+  //   cerr << endl;
+
+  Score* score = response->add_intention();
+  score->set_label("??");
+  score->set_confidence(0.0);
 
   return grpc::Status::OK;
 }
