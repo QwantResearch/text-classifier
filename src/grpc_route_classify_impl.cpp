@@ -19,19 +19,19 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
                                                const TextToClassify* request,
                                                TextClassified* response) {
 
-  // if (_debug_mode) {
-  //   cerr << "[DEBUG]: " << CurrentDateTime() << "\t" << "GetClassif";
-  //   cerr << "\t" << request->text() << "\t";
-  // }
+  if (_debug_mode) {
+    cerr << "[DEBUG]: " << CurrentDateTime() << "\t" << "GetClassif";
+    cerr << "\t" << request->text() << "\t";
+  }
 
-  // grpc::Status status = ParseInput(request, response);
-  // if (!status.ok()) {
-  //   return status;
-  // }
+  grpc::Status status = ParseInput(request, response);
+  if (!status.ok()) {
+    return status;
+  }
 
-  // std::string text = response->text();
-  // std::string domain = response->domain();
-  // std::string tokenized;
+  std::string text = response->text();
+  std::string domain = response->domain();
+  std::string tokenized;
 
   // std::vector<std::pair<fasttext::real, std::string>> results;
   // results = _classifier_controller->AskClassification(text, tokenized, domain, response->count(), response->threshold());
