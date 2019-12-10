@@ -11,11 +11,13 @@ Classifier::Predict(std::string& text, std::string& tokenized, int count, float 
   tokenized=_tokenizer->TokenizeStr(text);
 
   std::stringstream istr(tokenized);
-  _model.predictLine(istr, results, count, threshold);
+  // _model.predictLine(istr, results, count, threshold);
 
-  for (auto& r : results) {
-    // FastText returns labels like : '__label__XX'
-    r.second = r.second.substr(9);
-  }
+  // for (auto& r : results) {
+  //   // FastText returns labels like : '__label__XX'
+  //   r.second = r.second.substr(9);
+  // }
+
+  results.push_back(std::pair<fasttext::real, std::string>(0.0,"??"));
   return results;
 }

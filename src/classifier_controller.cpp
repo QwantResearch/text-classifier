@@ -61,8 +61,7 @@ ClassifierController::AskClassification(std::string& text, std::string& tokenize
                                     return l_classif->GetDomain() == domain;
                                 });
   if (it_classif != _list_classifs.end()) {
-      // to_return = (*it_classif)->Predict(text, tokenized, count, threshold);
-      to_return.push_back(std::pair<fasttext::real, std::string>(0.0,"??"));
+      to_return = (*it_classif)->Predict(text, tokenized, count, threshold);
   } else {
       to_return.push_back(std::pair<fasttext::real, std::string>(0.0,"DOMAIN ERROR"));
       // TODO: Deal with DOMAIN ERROR in GRPC
