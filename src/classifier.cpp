@@ -19,7 +19,5 @@ Classifier::Predict(std::string& text, std::string& tokenized, int count, float 
     r.second = r.second.substr(9);
   }
 
-  results.clear();
-  results.push_back(std::pair<fasttext::real, std::string>(0.0,"??"));
   return results;
 }
