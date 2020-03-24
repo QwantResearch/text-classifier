@@ -6,9 +6,9 @@
 
 #include <iostream>
 
-#include "qnlp/en_tokenizer.h"
-#include "qnlp/fr_tokenizer.h"
-#include "qnlp/tokenizer.h"
+#include "en_tokenizer.h"
+#include "fr_tokenizer.h"
+#include "tokenizer.h"
 
 class Tokenizer {
 public:

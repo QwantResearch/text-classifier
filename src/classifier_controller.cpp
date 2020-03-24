@@ -32,7 +32,7 @@ void ClassifierController::ProcessConfigFile(std::string& classif_config,
       std::cerr << "[ERROR] Malformed config for ("
         << domain << ", " << filename << ", " << lang << ")" << std::endl;
       std::cerr << "        Skipped line..." << std::endl;
-      continue;
+      exit(1);
     }
 
     cout << "[INFO]\t" << domain << "\t" << filename << "\t" << lang ;
@@ -43,9 +43,15 @@ void ClassifierController::ProcessConfigFile(std::string& classif_config,
       cout << "\t===> loaded" << endl;
     } catch (std::invalid_argument& inarg) {
       std::cerr << "[ERROR] " << inarg.what() << std::endl;
-      continue;
+      exit(1);
     }
   }
+
+  if (_list_classifs.empty()){
+    std::cerr << "[ERROR] No model has been loaded, exiting." << std::endl;
+    exit(1);
+  }
+
 }
 
 std::vector<Classifier *> ClassifierController::GetListClassifs() {
