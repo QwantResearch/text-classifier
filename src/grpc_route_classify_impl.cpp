@@ -3,10 +3,11 @@
 
 #include "grpc_route_classify_impl.h"
 
-grpc::Status GrpcRouteClassifyImpl::GetDomains(grpc::ServerContext* context,
-                                               const Empty* request,
-                                               Domains* response) {
-
+grpc::Status GrpcRouteClassifyImpl::GetDomains(
+  grpc::ServerContext* context,
+  const Empty* request,
+  Domains* response
+) {
   for (auto& it: _classifier_controller->getListClassifs()) {
     response->add_domains(it->getDomain());
   }
@@ -15,10 +16,11 @@ grpc::Status GrpcRouteClassifyImpl::GetDomains(grpc::ServerContext* context,
   return grpc::Status::OK;
 }
 
-grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
-                                               const TextToClassify* request,
-                                               TextClassified* response) {
-
+grpc::Status GrpcRouteClassifyImpl::GetClassif(
+  grpc::ServerContext* context,
+  const TextToClassify* request,
+  TextClassified* response
+) {
   if (_debug_mode) {
     cerr << "[DEBUG]: " << currentDateTime() << "\t" << "GetClassif";
     cerr << "\t" << request->text() << "\t";
@@ -49,9 +51,11 @@ grpc::Status GrpcRouteClassifyImpl::GetClassif(grpc::ServerContext* context,
   return grpc::Status::OK;
 }
 
-grpc::Status GrpcRouteClassifyImpl::StreamClassify(grpc::ServerContext* context,
-                                                   grpc::ServerReaderWriter< TextClassified,
-                                                                            TextToClassify>* stream) {
+grpc::Status GrpcRouteClassifyImpl::StreamClassify(
+  grpc::ServerContext* context,
+  grpc::ServerReaderWriter< TextClassified,
+  TextToClassify>* stream
+) {
   TextToClassify request;
   while (stream->Read(&request)) {
 
@@ -98,7 +102,10 @@ void GrpcRouteClassifyImpl::PrepareOutput(const TextToClassify* request, TextCla
   response->set_threshold(request->threshold());
 }
 
-GrpcRouteClassifyImpl::GrpcRouteClassifyImpl(shared_ptr<ClassifierController> classifier_controller, int debug_mode) {
+GrpcRouteClassifyImpl::GrpcRouteClassifyImpl(
+  shared_ptr<ClassifierController> classifier_controller,
+  int debug_mode
+) {
   _classifier_controller = classifier_controller;
   _debug_mode = debug_mode;
 }

@@ -7,9 +7,10 @@ ClassifierController::ClassifierController(std::string &classif_config) {
     ProcessConfigFile(classif_config, _list_classifs);
 }
 
-void ClassifierController::ProcessConfigFile(std::string &classif_config, 
-                                             std::vector<classifier *> &_list_classifs) {
-    
+void ClassifierController::ProcessConfigFile(
+  std::string &classif_config,
+  std::vector<classifier *> &_list_classifs
+) {
   std::ifstream model_config;
   model_config.open(classif_config);
   std::string line;
@@ -55,24 +56,28 @@ void ClassifierController::ProcessConfigFile(std::string &classif_config,
 }
 
 std::vector<classifier *> ClassifierController::getListClassifs() {
-    return _list_classifs;
+  return _list_classifs;
 }
 
 std::vector<std::pair<fasttext::real, std::string>>
-ClassifierController::askClassification(std::string &text, std::string &tokenized, std::string &domain,
-                               int count, float threshold) {
+ClassifierController::askClassification(
+  std::string &text,
+  std::string &tokenized,
+  std::string &domain,
+  int count,
+  float threshold
+) {
   std::vector<std::pair<fasttext::real, std::string>> to_return;
   if ((int)text.size() > 0) {
-      auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(),
-      [&](classifier *l_classif) {
-                                        return l_classif->getDomain() == domain;
-                                    });
-      if (it_classif != _list_classifs.end()) {
-          to_return = (*it_classif)->prediction(text, tokenized, count, threshold);
-      } else {
-          to_return.push_back(std::pair<fasttext::real, std::string>(0.0,"DOMAIN ERROR"));
-          // TODO: Deal with DOMAIN ERROR in GRPC
-      }
+    auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(), [&](classifier *l_classif) {
+      return l_classif->getDomain() == domain;
+    });
+    if (it_classif != _list_classifs.end()) {
+      to_return = (*it_classif)->prediction(text, tokenized, count, threshold);
+    } else {
+      to_return.push_back(std::pair<fasttext::real, std::string>(0.0,"DOMAIN ERROR"));
+      // TODO: Deal with DOMAIN ERROR in GRPC
+    }
   }
   return to_return;
 }

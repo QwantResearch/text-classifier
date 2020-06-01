@@ -34,8 +34,10 @@ void rest_server::setupRoutes() {
               Routes::bind(&rest_server::doClassificationGet, this));
 }
 
-void rest_server::doClassificationGet(const Rest::Request &request,
-                                      Http::ResponseWriter response) {
+void rest_server::doClassificationGet(
+  const Rest::Request &request,
+  Http::ResponseWriter response
+) {
   response.headers().add<Http::Header::AccessControlAllowHeaders>(
       "Content-Type");
   response.headers().add<Http::Header::AccessControlAllowMethods>(
@@ -45,7 +47,7 @@ void rest_server::doClassificationGet(const Rest::Request &request,
 
   bool first_domain = true;
   string response_string = "{\"domains\":[";
-  for (auto& it: _classifier_controller->getListClassifs()){
+  for (auto& it: _classifier_controller->getListClassifs()) {
     if (!first_domain)
       response_string.append(",");
     response_string.append("\"");
@@ -59,8 +61,10 @@ void rest_server::doClassificationGet(const Rest::Request &request,
   response.send(Pistache::Http::Code::Ok, response_string);
 }
 
-void rest_server::doClassificationPost(const Rest::Request &request,
-                                       Http::ResponseWriter response) {
+void rest_server::doClassificationPost(
+  const Rest::Request &request,
+  Http::ResponseWriter response
+) {
   response.headers().add<Http::Header::AccessControlAllowHeaders>(
       "Content-Type");
   response.headers().add<Http::Header::AccessControlAllowMethods>(
@@ -73,11 +77,9 @@ void rest_server::doClassificationPost(const Rest::Request &request,
   bool debugmode;
   string domain;
   
-  try {
-    rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode);
-  } catch (std::runtime_error e) {
+  if (!rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode)) {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-    response.send(Http::Code::Bad_Request, e.what());
+    response.send(Http::Code::Bad_Request, "`domain` value is null");
   }
 
   if (j.find("text") != j.end()) 
@@ -111,8 +113,10 @@ void rest_server::doClassificationPost(const Rest::Request &request,
   }
 }
 
-void rest_server::doClassificationBatchPost(const Rest::Request &request,
-                                       Http::ResponseWriter response) {
+void rest_server::doClassificationBatchPost(
+  const Rest::Request &request,
+  Http::ResponseWriter response
+) {
   response.headers().add<Http::Header::AccessControlAllowHeaders>(
       "Content-Type");
   response.headers().add<Http::Header::AccessControlAllowMethods>(
@@ -125,13 +129,11 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
   bool debugmode;
   string domain;
   
-  try {
-    rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode);
-  } catch (std::runtime_error e) {
+  if (!rest_server::fetchParamWithDefault(j, domain, count, threshold, debugmode)) {
     response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-    response.send(Http::Code::Bad_Request, e.what());
+    response.send(Http::Code::Bad_Request, "`domain` value is null");
   }
-  
+
   if (j.find("batch_data") != j.end()) {
     for (auto& it: j["batch_data"]){
       if (it.find("text") != it.end()) {
@@ -151,10 +153,8 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
             }
         }
         it.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
-        it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));        
-      } 
-      else 
-      {
+        it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
+      } else {
         response.headers().add<Http::Header::ContentType>(
             MIME(Application, Json));
         response.send(Http::Code::Bad_Request,
@@ -174,11 +174,13 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
   }
 }
 
-void rest_server::fetchParamWithDefault(const nlohmann::json& j, 
-                            string& domain, 
-                            int& count,
-                            float& threshold,
-                            bool& debugmode){
+bool rest_server::fetchParamWithDefault(
+  const nlohmann::json& j,
+  string& domain,
+  int& count,
+  float& threshold,
+  bool& debugmode
+) {
   count = 10;
   threshold = 0.0;
   debugmode = false;
@@ -195,17 +197,17 @@ void rest_server::fetchParamWithDefault(const nlohmann::json& j,
   if (j.find("domain") != j.end()) {
     domain = j["domain"];
   } else {
-    throw std::runtime_error("`domain` value is null");
+    return false;
   }
+  return true;
 }
 
-void rest_server::doAuth(const Rest::Request &request,
-                         Http::ResponseWriter response) {
+void rest_server::doAuth(const Rest::Request &request, Http::ResponseWriter response) {
   printCookies(request);
   response.cookies().add(Http::Cookie("lang", "fr-FR"));
   response.send(Http::Code::Ok);
 }
 
 void rest_server::shutdown() {
-  httpEndpoint->shutdown(); 
+  httpEndpoint->shutdown();
 }
