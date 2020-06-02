@@ -50,11 +50,11 @@ private:
   void doClassificationBatchPost(const Rest::Request &request,
                                  Http::ResponseWriter response);
 
-  void fetchParamWithDefault(const json& j,
-                              string& domain,
-                              int& count,
-                              float& threshold,
-                              bool& debugmode);
+  bool fetchParamWithDefault(const json& j,
+                             string& domain,
+                             int& count,
+                             float& threshold,
+                             bool& debugmode);
 
   bool process_localization(string &input, json &output);
 

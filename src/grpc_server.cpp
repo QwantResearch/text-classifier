@@ -3,11 +3,11 @@
 
 #include "grpc_server.h"
 
-void grpc_server::init(size_t thr){ //TODO: Check how to use thread number in grpc
+void grpc_server::init(size_t thr) { //TODO: Check how to use thread number in grpc
   _service = new GrpcRouteClassifyImpl(_classifier_controller, _debug_mode);
 }
 
-void grpc_server::start(){
+void grpc_server::start() {
   std::string server_address = "0.0.0.0:" + std::to_string(_num_port);
 
   grpc::ServerBuilder builder;
@@ -19,7 +19,6 @@ void grpc_server::start(){
   server->Wait();
 }
 
-void grpc_server::shutdown(){
+void grpc_server::shutdown() {
   // TODO: /!\ can't shutdown from same thread
 }
-

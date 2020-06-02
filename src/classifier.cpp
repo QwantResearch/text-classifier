@@ -8,10 +8,10 @@ classifier::prediction(std::string &text, std::string &tokenized, int count, flo
   std::vector<std::pair<fasttext::real, std::string>> results;
   if (*(text.end() - 1) != '\n')
     text.push_back('\n');
-  tokenized=_tokenizer->tokenize_str(text);
+  tokenized = this->_tokenizer->tokenize_str(text);
 
   std::stringstream istr(tokenized);
-  _model.predictLine(istr, results, count, threshold);
+  this->_model.predictLine(istr, results, count, threshold);
 
   for (auto &r : results) {
     // FastText returns labels like : '__label__XX'
