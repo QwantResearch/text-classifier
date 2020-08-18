@@ -12,14 +12,14 @@ export CMAKE_PREFIX_PATH=$PREFIX
 
 echo "Installing dependencies"
 
-pushd vendor/qnlp-toolkit
+pushd third_party/qnlp-toolkit
 	rm -rf build
 	bash install.sh $PREFIX
 popd
 
-for dep in pistache json
+for dep in pistache json fastText
 do
-pushd vendor/$dep
+pushd third_party/$dep
 	rm -rf build
 	mkdir -p build
 	pushd build
@@ -29,11 +29,30 @@ pushd vendor/$dep
 popd
 done
 
-pushd vendor/grpc
+pushd third_party/grpc
 
 	# Based on https://github.com/grpc/grpc/blob/master/test/distrib/cpp/run_distrib_test_cmake.sh
 
-	# Install c-ares
+    	# Install re2
+    	pushd third_party/re2
+        	mkdir -p cmake/build
+        	pushd cmake/build
+            		cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON ../..
+            		make -j4 install
+        	popd
+    	popd
+
+
+    	# Install abseil-cpp
+    	pushd third_party/abseil-cpp
+       		mkdir -p cmake/build
+ 	       	pushd cmake/build
+            		cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON ../..
+            		make -j4 install
+        	popd
+    	popd
+
+ 	# Install c-ares
 	pushd third_party/cares/cares
 		mkdir -p cmake/build
 		pushd cmake/build
@@ -66,10 +85,12 @@ pushd vendor/grpc
 	rm -rf cmake/build
 	mkdir -p cmake/build
 	pushd cmake/build
-		cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_PROTOBUF_PROVIDER=package -DgRPC_ZLIB_PROVIDER=package -DgRPC_CARES_PROVIDER=package -DgRPC_SSL_PROVIDER=package -DCMAKE_BUILD_TYPE=Release --DCMAKE_INSTALL_PREFIX="${PREFIX}" ../..
+		cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_PROTOBUF_PROVIDER=package -DgRPC_ZLIB_PROVIDER=package -DgRPC_CARES_PROVIDER=package -DgRPC_SSL_PROVIDER=package -DgRPC_RE2_PROVIDER=package -DCMAKE_BUILD_TYPE=Release -DgRPC_ABSL_PROVIDER=package --DCMAKE_INSTALL_PREFIX="${PREFIX}" ../..
+		
+		#cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_PROTOBUF_PROVIDER=package -DgRPC_ZLIB_PROVIDER=package -DgRPC_CARES_PROVIDER=package -DgRPC_SSL_PROVIDER=package -DCMAKE_BUILD_TYPE=Release --DCMAKE_INSTALL_PREFIX="${PREFIX}" ../..
 		# See https://github.com/grpc/grpc/issues/13841
-			make -j 4 && make install
-		popd
+		make -j 4 && make install
+	popd
 popd
 
 echo "Installing text-classifier"
