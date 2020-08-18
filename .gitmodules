@@ -10,3 +10,18 @@
 [submodule "vendor/grpc"]
 	path = vendor/grpc
 	url = https://github.com/grpc/grpc
+[submodule "third_party/grpc"]
+	path = third_party/grpc
+	url = https://github.com/grpc/grpc.git
+[submodule "third_party/qnlp-toolkit"]
+	path = third_party/qnlp-toolkit
+	url = https://github.com/QwantResearch/qnlp-toolkit
+[submodule "third_party/json"]
+	path = third_party/json
+	url = https://github.com/nlohmann/json.git
+[submodule "third_party/pistache"]
+	path = third_party/pistache
+	url = https://github.com/QwantResearch/pistache.git
+[submodule "third_party/fastText"]
+	path = third_party/fastText
+	url = https://github.com/facebookresearch/fastText.git
