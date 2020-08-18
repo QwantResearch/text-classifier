@@ -16,6 +16,9 @@ void tokenizer::set_tokenizer(std::string &lang, bool lowercase) {
   } else if (_lang == "en") {
     _tokenizer = new qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN, lowercase,
                                         false, false, false);
+  } else if (_lang == "char") {
+    _tokenizer = new qnlp::Tokenizer_char(qnlp::Tokenizer::PLAIN, lowercase,
+                                        false, false, false);
   } else {
     _tokenizer = new qnlp::Tokenizer(qnlp::Tokenizer::PLAIN, lowercase, false,
                                      false, false);
