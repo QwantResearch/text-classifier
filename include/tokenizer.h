@@ -8,6 +8,7 @@
 
 #include "en_tokenizer.h"
 #include "fr_tokenizer.h"
+#include "char_tokenizer.h"
 #include "tokenizer.h"
 
 class tokenizer {
