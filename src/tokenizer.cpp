@@ -11,14 +11,13 @@ void tokenizer::set_tokenizer(std::string &lang, bool lowercase) {
   _lang = lang;
 
   if (_lang == "fr") {
-    _tokenizer = new qnlp::Tokenizer_fr(qnlp::Tokenizer::PLAIN, lowercase,
-                                        false, false, false);
+    _tokenizer = new qnlp::Tokenizer_fr(lowercase, false, false, false);
   } else if (_lang == "en") {
-    _tokenizer = new qnlp::Tokenizer_en(qnlp::Tokenizer::PLAIN, lowercase,
-                                        false, false, false);
+    _tokenizer = new qnlp::Tokenizer_en(lowercase, false, false, false);
+  } else if (_lang == "char") {
+    _tokenizer = new qnlp::Tokenizer_char(lowercase, false, false, false);
   } else {
-    _tokenizer = new qnlp::Tokenizer(qnlp::Tokenizer::PLAIN, lowercase, false,
-                                     false, false);
+    _tokenizer = new qnlp::Tokenizer(lowercase, false, false, false);
   }
 }
 
