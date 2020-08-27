@@ -111,6 +111,7 @@ void rest_server::doClassificationPost(
         }
     }
     j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
+    j.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
     j.push_back(nlohmann::json::object_t::value_type(string("classification"), results));
     std::string s = j.dump();
     if (_debug_mode != 0)
@@ -163,6 +164,7 @@ void rest_server::doClassificationBatchPost(
             }
         }
         it.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
+        it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
         it.push_back(nlohmann::json::object_t::value_type(string("classification"), results));
       } else {
         response.headers().add<Http::Header::ContentType>(
