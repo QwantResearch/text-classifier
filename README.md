@@ -1,7 +1,7 @@
 Text Classifier
 =========
 
-A new C++ API for Intention classification at Qwant Research.
+A new C++ API for text classification at Qwant Research.
 The API is based on [`fasttext`](https://fasttext.cc/).
 
 ## Installation
