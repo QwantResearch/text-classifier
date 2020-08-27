@@ -113,6 +113,8 @@ void rest_server::doClassificationPost(
     j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
     j.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
     j.push_back(nlohmann::json::object_t::value_type(string("classification"), results));
+    j.push_back(nlohmann::json::object_t::value_type(string("model_name"),
+          _classifier_controller->getModelName(domain)));
     std::string s = j.dump();
     if (_debug_mode != 0)
       cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << s << endl;
@@ -166,6 +168,8 @@ void rest_server::doClassificationBatchPost(
         it.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
         it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
         it.push_back(nlohmann::json::object_t::value_type(string("classification"), results));
+        it.push_back(nlohmann::json::object_t::value_type(string("model_name"),
+          _classifier_controller->getModelName(domain)));
       } else {
         response.headers().add<Http::Header::ContentType>(
             MIME(Application, Json));
