@@ -21,6 +21,7 @@ public:
                                                                       std::string &domain,
                                                                       int count,
                                                                       float threshold);
+  std::string getModelName(std::string &domain);
 
 private:
   std::vector<classifier *> _list_classifs;

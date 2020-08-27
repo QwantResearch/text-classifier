@@ -11,16 +11,19 @@
 
 class classifier {
 public:
-  classifier(std::string &filename, std::string &domain, std::string &lang) : _domain(domain) {
+  classifier(std::string &filename, std::string &domain, std::string &lang) :
+      _domain(domain), _model_name(filename) {
     _model.loadModel(filename.c_str());
     _tokenizer = unique_ptr<tokenizer>(new tokenizer(lang,true));
   }
   std::vector<std::pair<fasttext::real, std::string>>
   prediction(std::__cxx11::string &text, std::__cxx11::string &tokenized, int count, float threshold=0.0);
   std::string getDomain() { return _domain; }
+  std::string getModelName() { return _model_name; }
 
 private:
   std::string _domain;
+  std::string _model_name;
   fasttext::FastText _model;
   unique_ptr<tokenizer> _tokenizer;
 };

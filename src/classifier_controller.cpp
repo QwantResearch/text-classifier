@@ -59,6 +59,15 @@ std::vector<classifier *> ClassifierController::getListClassifs() {
   return _list_classifs;
 }
 
+std::string ClassifierController::getModelName(std::string &domain){
+  auto it_classif = std::find_if(_list_classifs.begin(), _list_classifs.end(), [&](classifier *l_classif) {
+    return l_classif->getDomain() == domain;
+  });
+  if (it_classif != _list_classifs.end())
+    return (*it_classif)->getModelName();
+  return "";
+}
+
 std::vector<std::pair<fasttext::real, std::string>>
 ClassifierController::askClassification(
   std::string &text,
