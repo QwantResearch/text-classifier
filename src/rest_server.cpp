@@ -24,6 +24,16 @@ void rest_server::start() {
 void rest_server::setupRoutes() {
   using namespace Rest;
 
+  Routes::Post(router, "/classify/",
+               Routes::bind(&rest_server::doClassificationPost, this));
+
+  Routes::Post(router, "/classify_batch/",
+              Routes::bind(&rest_server::doClassificationBatchPost, this));
+
+  Routes::Get(router, "/classify/",
+              Routes::bind(&rest_server::doClassificationGet, this));
+
+  // For backward compatibality
   Routes::Post(router, "/intention/",
                Routes::bind(&rest_server::doClassificationPost, this));
 
@@ -102,6 +112,7 @@ void rest_server::doClassificationPost(
     }
     j.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
     j.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
+    j.push_back(nlohmann::json::object_t::value_type(string("classification"), results));
     std::string s = j.dump();
     if (_debug_mode != 0)
       cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << s << endl;
@@ -154,6 +165,7 @@ void rest_server::doClassificationBatchPost(
         }
         it.push_back(nlohmann::json::object_t::value_type(string("tokenized"), tokenized));
         it.push_back(nlohmann::json::object_t::value_type(string("intention"), results));
+        it.push_back(nlohmann::json::object_t::value_type(string("classification"), results));
       } else {
         response.headers().add<Http::Header::ContentType>(
             MIME(Application, Json));
