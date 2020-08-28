@@ -4,6 +4,8 @@
 #include "rest_server.h"
 #include "utils.h"
 
+
+
 void rest_server::init(size_t thr) {
   Pistache::Port port(_num_port);
   Address addr(Ipv4::any(), port);
@@ -16,8 +18,18 @@ void rest_server::init(size_t thr) {
 }
 
 void rest_server::start() {
-  httpEndpoint->setHandler(router.handler());
-  httpEndpoint->serve();
+  // auto handler = router.handlerWithTimeout();
+  // handler = router.handlerWithTimeout();
+  // std::cout << typeid(handler).name() << std::endl;
+
+  // auto _handler = MyHandler();
+
+
+  httpEndpoint->setHandler(std::make_shared<RouterHandlerTimeout>(router));
+  // httpEndpoint->setHandler(Http::make_handler<MyHandler>());
+  // httpEndpoint->setHandler(router.handlerWithTimeout());
+  httpEndpoint->serveThreaded();
+  sleep(15);
   httpEndpoint->shutdown();
 }
 
@@ -42,6 +54,10 @@ void rest_server::doClassificationGet(const Rest::Request &request,
       "GET, POST, DELETE, OPTIONS");
   response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
   response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+  response.timeoutAfter(std::chrono::seconds(1));
+
+  sleep(2);
+  // handler->onTimeout(request, response);
 
   bool first_domain = true;
   string response_string = "{\"domains\":[";
@@ -56,7 +72,7 @@ void rest_server::doClassificationGet(const Rest::Request &request,
   response_string.append("]}");
   if (_debug_mode != 0)
     cerr << "[DEBUG]\t" << currentDateTime() << "\tRESPONSE\t" << response_string << endl;
-  response.send(Pistache::Http::Code::Ok, response_string);
+  // response.send(Pistache::Http::Code::Ok, response_string);
 }
 
 void rest_server::doClassificationPost(const Rest::Request &request,
@@ -66,6 +82,8 @@ void rest_server::doClassificationPost(const Rest::Request &request,
   response.headers().add<Http::Header::AccessControlAllowMethods>(
       "GET, POST, DELETE, OPTIONS");
   response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
+  response.timeoutAfter(std::chrono::milliseconds(500));
+
   nlohmann::json j = nlohmann::json::parse(request.body());
   
   int count;
@@ -118,6 +136,8 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
   response.headers().add<Http::Header::AccessControlAllowMethods>(
       "GET, POST, DELETE, OPTIONS");
   response.headers().add<Http::Header::AccessControlAllowOrigin>("*");
+  response.timeoutAfter(std::chrono::milliseconds(500));
+
   nlohmann::json j = nlohmann::json::parse(request.body());
 
   int count;
@@ -172,6 +192,11 @@ void rest_server::doClassificationBatchPost(const Rest::Request &request,
     response.send(Http::Code::Bad_Request,
                   std::string("`batch_data` value is required"));
   }
+}
+
+void RouterHandlerTimeout::onTimeout(const Http::Request& request, Http::ResponseWriter writer) {
+  std::cout << "HERE" << std::endl;
+  writer.send(Http::Code::No_Content);
 }
 
 void rest_server::fetchParamWithDefault(const nlohmann::json& j, 
